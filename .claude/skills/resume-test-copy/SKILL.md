@@ -116,30 +116,43 @@ Confirm "Test" appears after the header and before "Industries:".
 
 ### Core Competencies — edit code
 
-**Important rules:**
-- Use `draw_rect` with white fill to erase the text area, then **immediately redraw all 4 grey background stripes**. This is the only reliable approach — `apply_redactions` removes the grey stripes even with `PDF_REDACT_LINE_ART_NONE`.
-- All `draw_rect` calls use `color=None` (no border/stroke) and `overlay=True`.
-- Grey stripe color: `(0.949, 0.949, 0.949)`. Stripe y-ranges: 255–273, 272–290, 289–307, 306–324.
-- Use `insert_textbox` with `align=1` (center) to match the original centered layout.
-- Use one `insert_textbox` per row of items. Row rects: y=257–273, y=274–290, y=291–307.
+**How it works:**
+- The PDF content stream stores text and grey background rectangles in **separate `q...Q` blocks**. Text blocks follow the pattern `q\n.75 0 0 .75 36 <y> cm\n0 0 0 RG 0 0 0 rg\n...BT...ET...\nQ`. Grey stripe blocks use `.949 .949 .949 rg` instead.
+- We surgically remove only the text-containing `q...Q` blocks by manipulating the raw content stream directly — the grey stripes are untouched.
+- **Critical regex detail:** the pattern ends at `Q` (not `\nQ\n`) so the trailing `\n` is preserved, keeping the next block's `\nq\n` delimiter intact.
+- After removing the text, insert new content using `insert_textbox` with `align=1` (center).
 
 ```python
-import fitz, os
+import fitz, os, re
 
 font_path = '/System/Library/Fonts/Supplemental/Arial Italic.ttf'
-grey      = (0.949, 0.949, 0.949)
 
 doc  = fitz.open(dest)
+xref = doc[0].get_contents()[0]
+stream = doc.xref_stream(xref).decode('latin-1')
+
+# Step 1 — remove Core Competencies text blocks from the content stream
+# Pattern: black-text q/Q blocks (0 0 0 RG) with cm y in range 250–320
+pattern = re.compile(
+    r'\nq\n\.75 0 0 \.75 36 ([\d.]+) cm\n0 0 0 RG 0 0 0 rg\n.*?\nQ',
+    re.DOTALL
+)
+
+removed = []
+def replacer(m):
+    y = float(m.group(1))
+    if 250 < y < 320:   # adjust range for other sections
+        removed.append(y)
+        return ''       # trailing \n stays, preserving \nq\n for next block
+    return m.group(0)
+
+new_stream = pattern.sub(replacer, stream)
+doc.update_stream(xref, new_stream.encode('latin-1'))
+print(f"Removed text at y-values: {removed}")
+
+# Step 2 — insert new centered text on the preserved grey stripes
+# Use one insert_textbox per row; adjust items and row count as needed
 page = doc[0]
-
-# Step 1 — white rect to erase Core Competencies text area
-page.draw_rect(fitz.Rect(36.0, 254.0, 580.0, 325.0), color=None, fill=(1, 1, 1), overlay=True)
-
-# Step 2 — redraw original 4 grey background stripes
-for y0, y1 in [(255.0, 273.0), (272.0, 290.0), (289.0, 307.0), (306.0, 324.0)]:
-    page.draw_rect(fitz.Rect(36.0, y0, 576.0, y1), color=None, fill=grey, overlay=True)
-
-# Step 3 — insert centered text, one insert_textbox per row (adjust items as needed)
 for row_rect, items in [
     (fitz.Rect(36.0, 257.0, 576.0, 273.0), '• item1  • item2  • item3'),
     (fitz.Rect(36.0, 274.0, 576.0, 290.0), '• item4  • item5  • item6'),
