@@ -251,10 +251,31 @@ os.replace('/tmp/resume_copy_out.pdf', dest)
 ### Summary — edit code
 
 ```python
-import fitz, os
+import fitz, os, re
 
-# Extract Calibri regular from the PDF
-doc = fitz.open(dest)
+doc  = fitz.open(dest)
+xref = doc[0].get_contents()[0]
+stream = doc.xref_stream(xref).decode('latin-1')
+
+# Remove Summary text block (single large block at y=119.449) from content stream
+pattern = re.compile(
+    r'\nq\n\.75 0 0 \.75 36 ([\d.]+) cm\n0 0 0 RG 0 0 0 rg\n.*?\nQ',
+    re.DOTALL
+)
+removed = []
+def replacer(m):
+    y = float(m.group(1))
+    if 118 < y < 121:
+        removed.append(round(y, 3))
+        return ''
+    return m.group(0)
+
+new_stream = pattern.sub(replacer, stream)
+doc.update_stream(xref, new_stream.encode('latin-1'))
+print(f"Removed blocks at y: {removed}")
+
+# Extract Calibri regular font from the PDF for inserting new text
+page = doc[0]
 for f in doc.get_page_fonts(0):
     if 'Calibri' in f[3] and 'Bold' not in f[3] and 'Italic' not in f[3]:
         font_data = doc.extract_font(f[0])[3]
@@ -262,27 +283,15 @@ for f in doc.get_page_fonts(0):
             fp.write(font_data)
         break
 
-page = doc[0]
-
-# Find and redact summary block
-summary_rect = None
-for b in page.get_text("blocks"):
-    if 'Results-driven' in b[4]:
-        summary_rect = fitz.Rect(b[0], b[1], b[2], b[3])
-        break
-
-if summary_rect:
-    page.add_redact_annot(summary_rect, fill=(1, 1, 1))
-    page.apply_redactions()
-
-    page.insert_text(
-        fitz.Point(summary_rect.x0, summary_rect.y0 + 12),
-        "Replacement text here",
-        fontname="Calibri",
-        fontfile="/tmp/Calibri.ttf",
-        fontsize=12,
-        color=(0, 0, 0)
-    )
+# Insert replacement text — left-aligned, Calibri 12pt, at summary position
+page.insert_text(
+    fitz.Point(36.0, 144.0),
+    "Replacement text here",
+    fontname="Calibri",
+    fontfile="/tmp/Calibri.ttf",
+    fontsize=12,
+    color=(0, 0, 0)
+)
 
 doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 doc.close()
