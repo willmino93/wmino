@@ -117,34 +117,38 @@ Confirm "Test" appears after the header and before "Industries:".
 ### Core Competencies — edit code
 
 **Important rules:**
-- Use `add_redact_annot` + `apply_redactions(graphics=fitz.PDF_REDACT_LINE_ART_NONE)` to remove text only — this preserves the original grey stripe backgrounds automatically.
-- Do NOT use `draw_rect` with white fill — it covers the grey stripes.
+- Use `draw_rect` with white fill to erase the text area, then **immediately redraw all 4 grey background stripes**. This is the only reliable approach — `apply_redactions` removes the grey stripes even with `PDF_REDACT_LINE_ART_NONE`.
+- All `draw_rect` calls use `color=None` (no border/stroke) and `overlay=True`.
+- Grey stripe color: `(0.949, 0.949, 0.949)`. Stripe y-ranges: 255–273, 272–290, 289–307, 306–324.
 - Use `insert_textbox` with `align=1` (center) to match the original centered layout.
-- Grey stripes cover y=254–325. Each stripe row is ~18pt tall. Place text in the first stripe rect (y=257–273).
+- Use one `insert_textbox` per row of items. Row rects: y=257–273, y=274–290, y=291–307.
 
 ```python
 import fitz, os
 
 font_path = '/System/Library/Fonts/Supplemental/Arial Italic.ttf'
+grey      = (0.949, 0.949, 0.949)
 
 doc  = fitz.open(dest)
 page = doc[0]
 
-# Step 1 — remove text only, preserve grey stripe backgrounds
-page.add_redact_annot(fitz.Rect(36.0, 254.0, 580.0, 325.0), fill=(1, 1, 1))
-page.apply_redactions(graphics=fitz.PDF_REDACT_LINE_ART_NONE)
+# Step 1 — white rect to erase Core Competencies text area
+page.draw_rect(fitz.Rect(36.0, 254.0, 580.0, 325.0), color=None, fill=(1, 1, 1), overlay=True)
 
-# Step 2 — insert centered replacement text (adjust items as needed)
-# Use one insert_textbox per row if you need multiple lines
-page.insert_textbox(
-    fitz.Rect(36.0, 257.0, 576.0, 273.0),
-    '• item1  • item2  • item3  • item4',
-    fontname="ArialIt",
-    fontfile=font_path,
-    fontsize=12,
-    color=(0, 0, 0),
-    align=1  # 1 = center
-)
+# Step 2 — redraw original 4 grey background stripes
+for y0, y1 in [(255.0, 273.0), (272.0, 290.0), (289.0, 307.0), (306.0, 324.0)]:
+    page.draw_rect(fitz.Rect(36.0, y0, 576.0, y1), color=None, fill=grey, overlay=True)
+
+# Step 3 — insert centered text, one insert_textbox per row (adjust items as needed)
+for row_rect, items in [
+    (fitz.Rect(36.0, 257.0, 576.0, 273.0), '• item1  • item2  • item3'),
+    (fitz.Rect(36.0, 274.0, 576.0, 290.0), '• item4  • item5  • item6'),
+]:
+    page.insert_textbox(
+        row_rect, items,
+        fontname="ArialIt", fontfile=font_path,
+        fontsize=12, color=(0, 0, 0), align=1
+    )
 
 doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 doc.close()
