@@ -1,6 +1,6 @@
 ---
 name: resume-test-copy
-description: Creates a uniquely named test copy of Will Mino's resume PDF. Can edit any section (summary, core competencies, etc.) — removes existing text and writes replacement text in the correct font. Use when asked to make a test copy of the resume or update sections of a copy.
+description: Creates a uniquely named test copy of Will Mino's resume PDF. Can edit any section (summary, core competencies, technical proficiencies, or job bullet points for TrueCar, EKN Engineering, Pfizer, Tanabe) — removes existing text and writes replacement text in the correct font. Use when asked to make a test copy or update any resume section.
 user-invocable: true
 ---
 
