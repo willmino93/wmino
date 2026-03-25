@@ -206,27 +206,42 @@ os.replace('/tmp/resume_copy_out.pdf', dest)
 ### Technical Proficiencies — edit code
 
 ```python
-import fitz, os
+import fitz, os, re
 
 font_path = '/System/Library/Fonts/Supplemental/Arial Italic.ttf'
 
 doc  = fitz.open(dest)
-page = doc[0]
+xref = doc[0].get_contents()[0]
+stream = doc.xref_stream(xref).decode('latin-1')
 
-# Step 1 — remove text only, preserve grey stripe backgrounds
-page.add_redact_annot(fitz.Rect(36.0, 356.0, 580.0, 393.0), fill=(1, 1, 1))
-page.apply_redactions(graphics=fitz.PDF_REDACT_LINE_ART_NONE)
-
-# Step 2 — insert centered replacement text
-page.insert_textbox(
-    fitz.Rect(36.0, 359.0, 576.0, 375.0),
-    '• item1  • item2  • item3  • item4',
-    fontname="ArialIt",
-    fontfile=font_path,
-    fontsize=12,
-    color=(0, 0, 0),
-    align=1  # 1 = center
+# Remove Tech Prof text blocks (y=356 and y=373) from content stream
+pattern = re.compile(
+    r'\nq\n\.75 0 0 \.75 36 ([\d.]+) cm\n0 0 0 RG 0 0 0 rg\n.*?\nQ',
+    re.DOTALL
 )
+removed = []
+def replacer(m):
+    y = float(m.group(1))
+    if 350 < y < 380:
+        removed.append(round(y, 2))
+        return ''
+    return m.group(0)
+
+new_stream = pattern.sub(replacer, stream)
+doc.update_stream(xref, new_stream.encode('latin-1'))
+print(f"Removed blocks at y: {removed}")
+
+# Insert centered replacement text on preserved grey stripes
+page = doc[0]
+for row_rect, items in [
+    (fitz.Rect(36.0, 359.0, 576.0, 375.0), '• item1  • item2  • item3  • item4'),
+    (fitz.Rect(36.0, 376.0, 576.0, 392.0), '• item5  • item6'),
+]:
+    page.insert_textbox(
+        row_rect, items,
+        fontname="ArialIt", fontfile=font_path,
+        fontsize=12, color=(0, 0, 0), align=1
+    )
 
 doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 doc.close()
