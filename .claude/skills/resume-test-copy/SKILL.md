@@ -465,11 +465,11 @@ def update_bullets(doc, company, new_texts):
 
 ### Combining bullet updates with section updates in one run
 
-When updating both headers (Summary / Core Comp / Tech Prof) AND bullets in the same script:
+When updating Subheader / Summary / Core Comp / Tech Prof AND bullets in the same script:
 
-1. Stream-manipulate page 0 to remove Summary/CoreComp/TechProf cm blocks → call `doc.update_stream(...)`.
+1. Stream-manipulate page 0 to remove Subheader/Summary/CoreComp/TechProf cm blocks → call `doc.update_stream(...)`.
 2. Call `update_bullets(doc, "truecar", ...)` — it reads the already-modified page 0 stream and further modifies it.
 3. Call `update_bullets(doc, "ekn", ...)` then `update_bullets(doc, "pfizer", ...)` for page 1.
 4. Call `update_bullets(doc, "tanabe", ...)` for page 2.
-5. Insert Summary / Core Comp / Tech Prof text via `page.insert_text(...)`.
+5. Insert Subheader / Summary / Core Comp / Tech Prof text via `page.insert_text(...)`.
 6. Save once: `doc.save(..., garbage=4, deflate=True)`.
