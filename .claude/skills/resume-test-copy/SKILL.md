@@ -98,11 +98,88 @@ with pdfplumber.open(dest) as pdf:
 
 Confirm "Test" appears after the header and before "Industries:".
 
-## Font info to store
+## Section font reference
 
-After running, record the following:
-- **Source file:** `Will Mino - Resume.pdf`
-- **Summary section font:** Calibri
-- **Font size:** 12pt
-- **Color:** Black (RGB 0, 0, 0)
-- **Replacement text:** Test
+| Section | Font | Size | Style | Color | BBox (approx) |
+|---|---|---|---|---|---|
+| Summary | Calibri | 12pt | Regular | Black | y: 132–203, x: 36–578 |
+| Core Competencies | Calibri-Italic | 12pt | Italic | Black | y: 257–322, x: 36–580 |
+
+### Core Competencies — known details
+- **Bullet character:** `•`
+- **Layout:** Items inline on each row separated by spaces, e.g. `• item1  • item2  • item3`
+- **Rows span:** `fitz.Rect(36.0, 257.0, 580.0, 322.0)` covers all 4 competency rows
+- **Insert point:** `fitz.Point(36.0, 269.0)`
+- **Font note:** The Calibri-Italic subset embedded in the PDF is missing number glyphs and the bullet character. Use Arial Italic from the system instead:
+  - Font file: `/System/Library/Fonts/Supplemental/Arial Italic.ttf`
+  - fontname: `"ArialIt"`
+
+### Core Competencies — edit code
+
+```python
+import fitz, os
+
+font_path = '/System/Library/Fonts/Supplemental/Arial Italic.ttf'
+
+doc  = fitz.open(dest)
+page = doc[0]
+
+# Redact all competency rows
+page.add_redact_annot(fitz.Rect(36.0, 257.0, 580.0, 322.0), fill=(1, 1, 1))
+page.apply_redactions()
+
+# Insert replacement items (adjust text as needed)
+page.insert_text(
+    fitz.Point(36.0, 269.0),
+    '• item1  • item2  • item3  • item4',
+    fontname="ArialIt",
+    fontfile=font_path,
+    fontsize=12,
+    color=(0, 0, 0)
+)
+
+doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
+doc.close()
+os.replace('/tmp/resume_copy_out.pdf', dest)
+```
+
+### Summary — edit code
+
+```python
+import fitz, os
+
+# Extract Calibri regular from the PDF
+doc = fitz.open(dest)
+for f in doc.get_page_fonts(0):
+    if 'Calibri' in f[3] and 'Bold' not in f[3] and 'Italic' not in f[3]:
+        font_data = doc.extract_font(f[0])[3]
+        with open('/tmp/Calibri.ttf', 'wb') as fp:
+            fp.write(font_data)
+        break
+
+page = doc[0]
+
+# Find and redact summary block
+summary_rect = None
+for b in page.get_text("blocks"):
+    if 'Results-driven' in b[4]:
+        summary_rect = fitz.Rect(b[0], b[1], b[2], b[3])
+        break
+
+if summary_rect:
+    page.add_redact_annot(summary_rect, fill=(1, 1, 1))
+    page.apply_redactions()
+
+    page.insert_text(
+        fitz.Point(summary_rect.x0, summary_rect.y0 + 12),
+        "Replacement text here",
+        fontname="Calibri",
+        fontfile="/tmp/Calibri.ttf",
+        fontsize=12,
+        color=(0, 0, 0)
+    )
+
+doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
+doc.close()
+os.replace('/tmp/resume_copy_out.pdf', dest)
+```
