@@ -213,17 +213,23 @@ def insert_centered(page, text, y, fontsize=12):
 - **Grey stripe rows (y baselines):** 371, 388
 - **Insert y-values:** 371.0, 388.0
 
-### Combined edit code (all three sections, single pass)
+### Combined edit code (all four sections, single pass)
 
 ```python
 import fitz, os, re
 
 calibri_regular = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf'
 calibri_italic  = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrii.ttf'
+calibri_bold    = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrib.ttf'
 
 doc  = fitz.open(dest)
-xref = doc[0].get_contents()[0]
-stream = doc.xref_stream(xref).decode('latin-1')
+# Always find the stream containing the cm blocks — do not assume index [0]
+target_xref = None
+for xref in doc[0].get_contents():
+    s = doc.xref_stream(xref).decode('latin-1')
+    if '.75 0 0 .75 36' in s:
+        target_xref = xref; break
+stream = doc.xref_stream(target_xref).decode('latin-1')
 
 pattern = re.compile(
     r'\nq\n\.75 0 0 \.75 36 ([\d.]+) cm\n0 0 0 RG 0 0 0 rg\n.*?\nQ',
@@ -232,37 +238,46 @@ pattern = re.compile(
 removed = []
 def replacer(m):
     y = float(m.group(1))
-    if 118 < y < 121:  removed.append(('Summary',  round(y,2))); return ''
-    if 250 < y < 320:  removed.append(('CoreComp', round(y,2))); return ''
-    if 350 < y < 380:  removed.append(('TechProf', round(y,2))); return ''
+    if  98 < y < 101:  removed.append(('Subheader', round(y,2))); return ''
+    if 118 < y < 121:  removed.append(('Summary',   round(y,2))); return ''
+    if 250 < y < 320:  removed.append(('CoreComp',  round(y,2))); return ''
+    if 350 < y < 380:  removed.append(('TechProf',  round(y,2))); return ''
     return m.group(0)
 
 new_stream = pattern.sub(replacer, stream)
-doc.update_stream(xref, new_stream.encode('latin-1'))
+doc.update_stream(target_xref, new_stream.encode('latin-1'))
 print(f"Removed: {removed}")
 
 page = doc[0]
-font_obj = fitz.Font(fontfile=calibri_italic)
+font_it   = fitz.Font(fontfile=calibri_italic)
+font_bold = fitz.Font(fontfile=calibri_bold)
 
-def insert_centered(text, y):
-    width = font_obj.text_length(text, fontsize=12)
+def insert_centered_italic(text, y):
+    width = font_it.text_length(text, fontsize=12)
     x = 36.0 + (540.0 - width) / 2
     page.insert_text(fitz.Point(x, y), text,
         fontname="CalibriIt", fontfile=calibri_italic,
         fontsize=12, color=(0, 0, 0))
 
-# Summary — left-aligned, Calibri Regular
+# Subheader — centered, Calibri-Bold 16pt, y_insert=118.683
+new_subheader = "Your new subheader text here"
+width_b = font_bold.text_length(new_subheader, fontsize=16)
+x_sub   = 36.0 + (540.0 - width_b) / 2
+page.insert_text(fitz.Point(x_sub, 118.683), new_subheader,
+    fontname="CalibriB", fontfile=calibri_bold, fontsize=16, color=(0, 0, 0))
+
+# Summary — left-aligned, Calibri Regular, y=144.0
 page.insert_text(fitz.Point(36.0, 144.0), "Replacement summary text here",
     fontname="Calibri", fontfile=calibri_regular, fontsize=12, color=(0, 0, 0))
 
 # Core Competencies — centered, Calibri Italic (add/remove rows as needed)
-insert_centered('• item1  • item2', 269.0)
-insert_centered('• item3  • item4', 286.0)
-insert_centered('• item5',          303.0)
+insert_centered_italic('• item1  • item2', 269.0)
+insert_centered_italic('• item3  • item4', 286.0)
+insert_centered_italic('• item5',          303.0)
 
 # Technical Proficiencies — centered, Calibri Italic
-insert_centered('• item1  • item2  • item3', 371.0)
-insert_centered('• item4  • item5',          388.0)
+insert_centered_italic('• item1  • item2  • item3', 371.0)
+insert_centered_italic('• item4  • item5',          388.0)
 
 doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 doc.close()
