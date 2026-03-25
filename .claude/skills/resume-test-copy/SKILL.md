@@ -45,47 +45,76 @@ doc.close()
 
 **Expected result:** Font: Calibri, Size: 12.0, Color: 0 (black)
 
-## Step 3 — Remove summary text and insert "Test" (overwrites the copy)
+## Step 3 — Remove and replace section text via content stream manipulation
+
+All sections (Summary, Core Competencies, Technical Proficiencies) use the same approach:
+surgically remove the text `q...Q` blocks from the raw content stream, then insert new text.
+
+**How it works:**
+- Every text block in the PDF follows the pattern: `q\n.75 0 0 .75 36 <y> cm\n0 0 0 RG 0 0 0 rg\n...BT...ET...\nQ`
+- Grey background rectangles use `.949 .949 .949 rg` instead — so they are never touched
+- The regex ends at `Q` (not `\nQ\n`) to preserve the trailing `\n`, keeping adjacent blocks valid
+
+**Section cm y-values (used to target specific blocks):**
+
+| Section | cm y-range to remove | Grey stripes? | Insert font |
+|---|---|---|---|
+| Summary | `118 < y < 121` (single block at y=119.449) | No | Calibri (extracted) |
+| Core Competencies | `250 < y < 320` (4 blocks: y≈255, 272, 288, 305) | Yes — 4 stripes | Arial Italic |
+| Technical Proficiencies | `350 < y < 380` (2 blocks: y≈356, 373) | Yes — 2 stripes | Arial Italic |
 
 ```python
-import fitz, os
+import fitz, os, re
 
-# Extract Calibri font from the copy to a temp file
-doc = fitz.open(dest)
-for f in doc.get_page_fonts(0):
-    if 'Calibri' in f[3] and 'Bold' not in f[3] and 'Italic' not in f[3]:
-        font_data = doc.extract_font(f[0])[3]
-        with open('/tmp/Calibri.ttf', 'wb') as fp:
-            fp.write(font_data)
-        break
+font_path_italic  = '/System/Library/Fonts/Supplemental/Arial Italic.ttf'
 
+doc  = fitz.open(dest)
+xref = doc[0].get_contents()[0]
+stream = doc.xref_stream(xref).decode('latin-1')
+
+pattern = re.compile(
+    r'\nq\n\.75 0 0 \.75 36 ([\d.]+) cm\n0 0 0 RG 0 0 0 rg\n.*?\nQ',
+    re.DOTALL
+)
+
+# Set y_min / y_max to target the section you want to edit
+Y_MIN, Y_MAX = 250, 320   # Core Competencies example — adjust per section
+
+removed = []
+def replacer(m):
+    y = float(m.group(1))
+    if Y_MIN < y < Y_MAX:
+        removed.append(round(y, 2))
+        return ''
+    return m.group(0)
+
+new_stream = pattern.sub(replacer, stream)
+doc.update_stream(xref, new_stream.encode('latin-1'))
+print(f"Removed blocks at y: {removed}")
+
+# Insert new text — use insert_textbox for centered sections (Core Comp / Tech Prof)
+# Use insert_text for left-aligned sections (Summary)
 page = doc[0]
 
-# Find summary block
-summary_rect = None
-for b in page.get_text("blocks"):
-    if 'Results-driven' in b[4]:
-        summary_rect = fitz.Rect(b[0], b[1], b[2], b[3])
-        break
-
-if summary_rect:
-    page.add_redact_annot(summary_rect, fill=(1, 1, 1))
-    page.apply_redactions()
-
-    page.insert_text(
-        fitz.Point(summary_rect.x0, summary_rect.y0 + 12),
-        "Test",
-        fontname="Calibri",
-        fontfile="/tmp/Calibri.ttf",
-        fontsize=12,
-        color=(0, 0, 0)
+# Example — Core Competencies (centered, Arial Italic, bullet items per row):
+for row_rect, items in [
+    (fitz.Rect(36.0, 257.0, 576.0, 273.0), '• item1  • item2  • item3'),
+    (fitz.Rect(36.0, 274.0, 576.0, 290.0), '• item4  • item5  • item6'),
+]:
+    page.insert_textbox(
+        row_rect, items,
+        fontname="ArialIt", fontfile=font_path_italic,
+        fontsize=12, color=(0, 0, 0), align=1
     )
 
-# Overwrite the same copy — no new file
+# Example — Summary (left-aligned, Calibri regular, plain text):
+# Extract Calibri from the PDF first, then:
+# page.insert_text(fitz.Point(36.0, 144.0), "Replacement text here",
+#     fontname="Calibri", fontfile="/tmp/Calibri.ttf", fontsize=12, color=(0,0,0))
+
 doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 doc.close()
 os.replace('/tmp/resume_copy_out.pdf', dest)
-print(f"Updated: {os.path.basename(dest)}")
 ```
 
 ## Step 4 — Verify
