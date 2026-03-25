@@ -63,9 +63,10 @@ surgically remove the text `q...Q` blocks from the raw content stream, then inse
 
 | Section | cm y-range to remove | Grey stripes? | Insert font |
 |---|---|---|---|
-| Summary | `118 < y < 121` (single block at y=119.449) | No | Calibri (extracted) |
-| Core Competencies | `250 < y < 320` (4 blocks: y≈255, 272, 288, 305) | Yes — 4 stripes | Arial Italic |
-| Technical Proficiencies | `350 < y < 380` (2 blocks: y≈356, 373) | Yes — 2 stripes | Arial Italic |
+| Subheader | `98 < y < 101` (single block at y=99.918) | No | Calibri-Bold |
+| Summary | `118 < y < 121` (single block at y=119.449) | No | Calibri Regular |
+| Core Competencies | `250 < y < 320` (4 blocks: y≈255, 272, 288, 305) | Yes — 4 stripes | Calibri Italic |
+| Technical Proficiencies | `350 < y < 380` (2 blocks: y≈356, 373) | Yes — 2 stripes | Calibri Italic |
 
 ```python
 import fitz, os, re
