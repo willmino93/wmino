@@ -136,17 +136,19 @@ Confirm "Test" appears after the header and before "Industries:".
 
 | Section | Font | Size | Style | Color | BBox (approx) |
 |---|---|---|---|---|---|
+| Subheader | Calibri-Bold | 16pt | Bold | Black | y: 103–119, x: centered (≈119–499) |
 | Summary | Calibri Regular | 12pt | Regular | Black | y: 132–203, x: 36–578 |
 | Core Competencies | Calibri Italic | 12pt | Italic | Black | y: 257–322, x: 36–580 |
 | Technical Proficiencies | Calibri Italic | 12pt | Italic | Black | y: 357–390, x: 36–580 |
 
 ### Font files
 
-Do **not** use the Calibri-Italic subset embedded in the original PDF — it is a stripped subset and is missing bullet (`•`) and other glyphs.
+Do **not** use the Calibri subset embedded in the original PDF — it is a stripped subset and may be missing glyphs.
 
 Use the **full Calibri fonts from Microsoft Excel**:
 - Regular: `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf` → `fontname="Calibri"`
 - Italic:  `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrii.ttf` → `fontname="CalibriIt"`
+- Bold:    `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrib.ttf` → `fontname="CalibriB"`
 
 **Important:** `insert_textbox` fails silently with these font files. Use `insert_text` instead and manually compute the centered x position using `fitz.Font.text_length()`.
 
