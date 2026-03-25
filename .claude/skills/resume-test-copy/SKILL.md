@@ -116,19 +116,29 @@ Confirm "Test" appears after the header and before "Industries:".
 
 ### Core Competencies — edit code
 
+**Important rules:**
+- Do NOT use `add_redact_annot` — it removes the grey background stripes from the original design.
+- Do NOT use `draw_rect` with a white fill to erase text — same problem, it covers the grey stripes.
+- The correct approach: draw a white rect to erase, then **immediately redraw all 4 grey background stripes**, then insert text. This restores the section to its original appearance with new text.
+- Grey stripe color: `(0.949, 0.949, 0.949)`. All draws use `color=None` (no border/stroke).
+
 ```python
 import fitz, os
 
 font_path = '/System/Library/Fonts/Supplemental/Arial Italic.ttf'
+grey      = (0.949, 0.949, 0.949)
 
 doc  = fitz.open(dest)
 page = doc[0]
 
-# Redact all competency rows
-page.add_redact_annot(fitz.Rect(36.0, 257.0, 580.0, 322.0), fill=(1, 1, 1))
-page.apply_redactions()
+# Step 1 — white rect to erase existing text in the section
+page.draw_rect(fitz.Rect(36.0, 254.0, 580.0, 325.0), color=None, fill=(1, 1, 1), overlay=True)
 
-# Insert replacement items (adjust text as needed)
+# Step 2 — restore original 4 grey background stripes
+for y0, y1 in [(255.0, 273.0), (272.0, 290.0), (289.0, 307.0), (306.0, 324.0)]:
+    page.draw_rect(fitz.Rect(36.0, y0, 576.0, y1), color=None, fill=grey, overlay=True)
+
+# Step 3 — insert replacement text on top (adjust items as needed)
 page.insert_text(
     fitz.Point(36.0, 269.0),
     '• item1  • item2  • item3  • item4',
