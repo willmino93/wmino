@@ -231,3 +231,193 @@ doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 doc.close()
 os.replace('/tmp/resume_copy_out.pdf', dest)
 ```
+
+---
+
+## Updating Job Bullet Points
+
+This method is **distinct** from the Summary / Core Competencies / Technical Proficiencies method.
+Use it whenever the user asks to change bullet-point text under any of the four jobs.
+
+### How bullets are stored in the PDF
+
+Each bullet entry (marker + text, including all continuation lines) is stored as **one or more `q…Q` cm blocks** in the content stream. Bullet markers (`●`, U+25CF) and the text span are in the **same block** — they cannot be separated via stream manipulation. The text is in CIDFont encoding (Identity-H), not plain ASCII, so it cannot be substituted in-place.
+
+**Method:** surgically remove the cm block(s) for a bullet, then re-insert both the bullet marker and new text using `insert_text`.
+
+### Font + rendering details
+
+| Element | Font file | fontname | Size | x |
+|---|---|---|---|---|
+| Bullet `●` (TrueCar) | `/System/Library/Fonts/Supplemental/Arial.ttf` | `"ArialNew"` | 11pt | 36.0 |
+| Bullet `●` (EKN / Pfizer / Tanabe) | same Arial.ttf | `"ArialNew"` | 12pt | 36.0 |
+| Bullet text (all companies) | `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf` | `"Calibri"` | 12pt | 45.7 (TrueCar) / 46.6 (others) |
+
+**Font metrics (Calibri 12pt):** ascender = 11.426 pt, line height = 14.648 pt
+**Font metrics (Arial 11pt):** ascender = 9.958 pt
+**Font metrics (Arial 12pt):** ascender = 10.863 pt
+
+**y_insert formula:** `y_insert = y_bbox_top_original + ascender`
+(`insert_text` takes a baseline coordinate; span bboxes give the top of the glyph)
+
+**Note on hyphens:** Calibri from Excel maps ASCII `-` (U+002D) to the Unicode hyphen `‐` (U+2010). This is purely typographic — the glyph renders identically.
+
+### Bullet position map (all companies)
+
+All values are derived from the **original** `Will Mino - Resume.pdf` and remain stable as long as the original is not rebuilt.
+
+```python
+CALIBRI_ASCENDER = 11.426
+CALIBRI_LINE_HT  = 14.648
+ARIAL11_ASCENDER =  9.958   # TrueCar
+ARIAL12_ASCENDER = 10.863   # EKN, Pfizer, Tanabe
+
+BULLETS = {
+    "truecar": {
+        "page": 0, "x_text": 45.7, "arial_size": 11,
+        # entries: (cm_y_lo, cm_y_hi,  y_marker_fitz_top, y_text_fitz_top)
+        "entries": [
+            (453, 492,  465.8, 466.8),   # bullet 1
+            (492, 521,  495.1, 496.1),   # bullet 2
+            (521, 551,  524.4, 525.4),   # bullet 3
+            (551, 565,  553.7, 554.6),   # bullet 4
+            (565, 594,  568.3, 569.3),   # bullet 5
+            (594, 624,  597.6, 598.6),   # bullet 6
+            (624, 653,  626.9, 627.9),   # bullet 7
+            (653, 682,  656.2, 657.2),   # bullet 8
+            (682, 740,  685.5, 686.5),   # bullet 9 (includes trailing empty blocks)
+        ],
+    },
+    "ekn": {
+        "page": 1, "x_text": 46.6, "arial_size": 12,
+        "entries": [
+            (86,  125,   98.1,  99.9),   # bullet 1
+            (125, 154,  127.4, 129.2),   # bullet 2
+            (154, 184,  156.6, 158.5),   # bullet 3
+            (184, 213,  185.9, 187.8),   # bullet 4
+            (213, 242,  215.2, 217.1),   # bullet 5
+            (242, 272,  244.5, 246.4),   # bullet 6
+            (272, 300,  273.8, 275.7),   # bullet 7
+        ],
+    },
+    "pfizer": {
+        "page": 1, "x_text": 46.6, "arial_size": 12,
+        "entries": [
+            (345, 384,  357.1, 358.9),   # bullet 1
+            (384, 413,  386.4, 388.2),   # bullet 2
+            (413, 443,  415.7, 417.5),   # bullet 3
+            (443, 472,  445.0, 446.8),   # bullet 4
+            (472, 501,  474.3, 476.1),   # bullet 5
+            (501, 545,  503.6, 505.4),   # bullet 6
+        ],
+    },
+    "tanabe": {
+        "page": 2, "x_text": 46.6, "arial_size": 12,
+        "entries": [
+            (86,  125,   98.1,  99.9),   # bullet 1
+            (125, 140,  127.4, 129.2),   # bullet 2
+            (140, 154,  142.0, 143.9),   # bullet 3
+            (154, 200,  156.6, 158.5),   # bullet 4
+        ],
+    },
+}
+```
+
+### Bullet update function
+
+```python
+import fitz, os, re
+
+calibri = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf'
+arial   = '/System/Library/Fonts/Supplemental/Arial.ttf'
+
+# (paste BULLETS dict and constants from above)
+
+stream_pattern = re.compile(
+    r'\nq\n\.75 0 0 \.75 36 ([\d.]+) cm\n0 0 0 RG 0 0 0 rg\n.*?\nQ',
+    re.DOTALL
+)
+font_cal = fitz.Font(fontfile=calibri)
+
+def wrap_text(text, max_width=533.0, fontsize=12):
+    words = text.split()
+    lines, cur = [], ""
+    for w in words:
+        t = (cur + " " + w).strip()
+        if font_cal.text_length(t, fontsize=fontsize) <= max_width:
+            cur = t
+        else:
+            if cur: lines.append(cur)
+            cur = w
+    if cur: lines.append(cur)
+    return lines
+
+def update_bullets(doc, company, new_texts):
+    """Replace bullet text for a company.
+    new_texts: list of strings, one per bullet (in order).
+    Only bullets with a corresponding entry in new_texts are replaced.
+    """
+    cfg    = BULLETS[company]
+    x      = cfg["x_text"]
+    a_size = cfg["arial_size"]
+    a_asc  = ARIAL11_ASCENDER if a_size == 11 else ARIAL12_ASCENDER
+    pg     = doc[cfg["page"]]
+
+    # Find the main content stream
+    target_xref = None
+    for xref in pg.get_contents():
+        s = doc.xref_stream(xref).decode('latin-1')
+        if '.75 0 0 .75 36' in s:
+            target_xref = xref; break
+
+    stream = doc.xref_stream(target_xref).decode('latin-1')
+
+    for i, (cm_lo, cm_hi, y_marker, y_text) in enumerate(cfg["entries"]):
+        if i >= len(new_texts): break
+
+        # Remove cm blocks (removes old bullet marker + text)
+        def replacer(m, lo=cm_lo, hi=cm_hi):
+            y = float(m.group(1))
+            return '' if lo < y < hi else m.group(0)
+        stream = stream_pattern.sub(replacer, stream)
+
+        # Re-insert bullet marker ●
+        pg.insert_text(
+            fitz.Point(36.0, y_marker + a_asc),
+            "●",
+            fontname="ArialNew", fontfile=arial,
+            fontsize=a_size, color=(0, 0, 0)
+        )
+
+        # Insert new text (word-wrapped)
+        y_ins = y_text + CALIBRI_ASCENDER
+        for j, line in enumerate(wrap_text(new_texts[i])):
+            pg.insert_text(
+                fitz.Point(x, y_ins + j * CALIBRI_LINE_HT),
+                line, fontname="Calibri", fontfile=calibri,
+                fontsize=12, color=(0, 0, 0)
+            )
+
+    doc.update_stream(target_xref, stream.encode('latin-1'))
+
+# Example:
+# doc = fitz.open(dest)
+# update_bullets(doc, "truecar", ["Bullet 1 text.", "Bullet 2 text.", ...])
+# update_bullets(doc, "ekn",     [...])
+# update_bullets(doc, "pfizer",  [...])
+# update_bullets(doc, "tanabe",  [...])
+# doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
+# doc.close()
+# os.replace('/tmp/resume_copy_out.pdf', dest)
+```
+
+### Combining bullet updates with section updates in one run
+
+When updating both headers (Summary / Core Comp / Tech Prof) AND bullets in the same script:
+
+1. Stream-manipulate page 0 to remove Summary/CoreComp/TechProf cm blocks → call `doc.update_stream(...)`.
+2. Call `update_bullets(doc, "truecar", ...)` — it reads the already-modified page 0 stream and further modifies it.
+3. Call `update_bullets(doc, "ekn", ...)` then `update_bullets(doc, "pfizer", ...)` for page 1.
+4. Call `update_bullets(doc, "tanabe", ...)` for page 2.
+5. Insert Summary / Core Comp / Tech Prof text via `page.insert_text(...)`.
+6. Save once: `doc.save(..., garbage=4, deflate=True)`.
