@@ -416,9 +416,11 @@ def render_company_section(doc, company, bullets):
     doc.update_stream(target_xref, stream.encode('latin-1'))
     print(f"{company}: removed cm blocks at y={removed}")
 
-    # 2. Re-render all bullets dynamically from y_start
+    # 2. Re-render all bullets dynamically from y_start — skip blank entries
     y = cfg["y_start"]
     for text in bullets:
+        if not text.strip():
+            continue
         lines = wrap_text(text, max_width=cfg["wrap_width"])
         # Bullet marker ●
         page.insert_text(fitz.Point(36.0, y + a_asc), "●",
