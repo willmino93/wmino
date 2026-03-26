@@ -360,7 +360,7 @@ def generate_pdf(data):
 INSTRUCTIONS = """
 Enter your resume updates below using section labels.
 Only the sections you include will be updated — everything else stays the same.
-Press Enter twice on a blank line when finished.
+When finished, press Ctrl+D (on Mac/Linux) to submit.
 
   Subheader:              text on the same line
   Summary:                text on the same line (or next line)
@@ -382,13 +382,7 @@ Example:
 
 def read_input():
     print(INSTRUCTIONS)
-    lines = []
-    while True:
-        line = input()
-        if line == '' and lines and lines[-1] == '':
-            break
-        lines.append(line)
-    return '\n'.join(lines)
+    return sys.stdin.read()
 
 
 def main():
