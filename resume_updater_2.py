@@ -345,12 +345,14 @@ def generate_pdf(data):
     insert_centered(page0, subheader, 118.683, font_bold, "CalibriB", CALIBRI_BOLD, fontsize=16)
     print(f"  Subheader: {subheader!r}")
 
-    page0.insert_text(
-        fitz.Point(36.0, 144.0), summary,
-        fontname="Calibri", fontfile=CALIBRI_REGULAR,
-        fontsize=12, color=(0, 0, 0),
-    )
-    print(f"  Summary: {summary[:60]!r}{'...' if len(summary) > 60 else ''}")
+    summary_lines = wrap_text(summary, font_cal, max_width=540.0)
+    for i, line in enumerate(summary_lines):
+        page0.insert_text(
+            fitz.Point(36.0, 144.0 + i * CALIBRI_INNER_LINE_HT), line,
+            fontname="Calibri", fontfile=CALIBRI_REGULAR,
+            fontsize=12, color=(0, 0, 0),
+        )
+    print(f"  Summary: {len(summary_lines)} line(s)")
 
     cc_y_values = [269.0, 286.0, 303.0, 320.0]
     for i, row in enumerate(core_competencies[:4]):
