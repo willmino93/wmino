@@ -420,6 +420,7 @@ def wrap_text(text, max_width=529.0, fontsize=12):
 def render_company_section(doc, company, bullets):
     """Remove all original bullets for a company and re-render from the provided list.
     bullets: complete list of bullet strings from resume.yaml — any count is supported.
+    Returns: actual y position after the last rendered bullet (used for dynamic reflow).
     """
     cfg    = COMPANY_SECTIONS[company]
     page   = doc[cfg["page"]]
@@ -453,7 +454,7 @@ def render_company_section(doc, company, bullets):
         page.insert_text(fitz.Point(36.0, y + a_asc), "●",
             fontname="ArialNew", fontfile=arial,
             fontsize=cfg["arial_size"], color=(0, 0, 0))
-        # Text lines
+        # Text lines — all lines at same x_text (consistent indent, ~18pt gap from bullet)
         for i, line in enumerate(lines):
             page.insert_text(
                 fitz.Point(x_text, y + CALIBRI_ASCENDER + i * CALIBRI_LINE_HT),
@@ -462,12 +463,64 @@ def render_company_section(doc, company, bullets):
         # Advance y for next bullet: (n_lines + 1) × line_height
         y += (len(lines) + 1) * CALIBRI_LINE_HT
 
-# Example:
+    return y  # actual y end — compare to cfg["original_y_end"] for reflow delta
+
+
+def shift_blocks_in_y_range(doc, page_num, y_lo, y_hi, delta):
+    """Shift ALL cm blocks (text + grey backgrounds) with y in [y_lo, y_hi] by delta.
+
+    Works by modifying only the y-value in the `.75 0 0 .75 36 <y> cm` transform line,
+    leaving all block content intact. Used to reflow section headers and static blocks
+    when bullet content on the same page grows or shrinks.
+
+    y_lo / y_hi: inclusive range of cm y-values to shift.
+    delta:       positive = shift down (content grew), negative = shift up (content shrank).
+    """
+    page = doc[page_num]
+    target_xref = None
+    for xref in page.get_contents():
+        s = doc.xref_stream(xref).decode('latin-1')
+        if '.75 0 0 .75 36' in s:
+            target_xref = xref; break
+
+    stream = doc.xref_stream(target_xref).decode('latin-1')
+
+    cm_pattern = re.compile(r'(\.75 0 0 \.75 36 )([\d.]+)( cm\n)')
+
+    def shifter(m):
+        y = float(m.group(2))
+        if y_lo <= y <= y_hi:
+            return m.group(1) + f"{y + delta:.3f}" + m.group(3)
+        return m.group(0)
+
+    new_stream = cm_pattern.sub(shifter, stream)
+    doc.update_stream(target_xref, new_stream.encode('latin-1'))
+    print(f"page {page_num}: shifted y={y_lo}–{y_hi} by delta={delta:+.1f}")
+
+
+# Example — render all companies with dynamic reflow:
+#
 # doc = fitz.open(dest)
+#
 # render_company_section(doc, "truecar", yaml_data["bullets"]["truecar"])
-# render_company_section(doc, "ekn",     yaml_data["bullets"]["ekn"])
-# render_company_section(doc, "pfizer",  yaml_data["bullets"]["pfizer"])
-# render_company_section(doc, "tanabe",  yaml_data["bullets"]["tanabe"])
+# # (TrueCar is the last section on page 0 — no reflow needed on page 0)
+#
+# # Page 1: render EKN, then reflow Pfizer header if EKN height changed
+# ekn_y_end = render_company_section(doc, "ekn", yaml_data["bullets"]["ekn"])
+# delta_ekn = ekn_y_end - COMPANY_SECTIONS["ekn"]["original_y_end"]
+# if delta_ekn != 0:
+#     # Shift Pfizer header blocks (company name, dates, title at cm y≈317–345)
+#     shift_blocks_in_y_range(doc, 1, y_lo=300, y_hi=345, delta=delta_ekn)
+#     COMPANY_SECTIONS["pfizer"]["y_start"] += delta_ekn
+# render_company_section(doc, "pfizer", yaml_data["bullets"]["pfizer"])
+#
+# # Page 2: render Tanabe, then reflow Education/Awards if Tanabe height changed
+# tanabe_y_end = render_company_section(doc, "tanabe", yaml_data["bullets"]["tanabe"])
+# delta_tanabe = tanabe_y_end - COMPANY_SECTIONS["tanabe"]["original_y_end"]
+# if delta_tanabe != 0:
+#     # Shift Education (y≈219–307) and Awards (y≈324–353)
+#     shift_blocks_in_y_range(doc, 2, y_lo=200, y_hi=400, delta=delta_tanabe)
+#
 # doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 # doc.close()
 # os.replace('/tmp/resume_copy_out.pdf', dest)
