@@ -359,7 +359,7 @@ def generate_pdf(data):
 INSTRUCTIONS = """
 Enter your resume updates below using section labels.
 Only the sections you include will be updated — everything else stays the same.
-Type END on its own line when finished.
+Press Enter twice on a blank line when finished.
 
   Subheader:              text on the same line
   Summary:                text on the same line (or next line)
