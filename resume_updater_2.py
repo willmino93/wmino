@@ -149,10 +149,26 @@ def parse_updates(text):
     return updates
 
 
+def split_even_rows(items, n_rows):
+    """Split a flat list of items into n_rows as evenly as possible."""
+    total = len(items)
+    base, extra = divmod(total, n_rows)
+    rows, i = [], 0
+    for r in range(n_rows):
+        size = base + (1 if r < extra else 0)
+        rows.append(items[i:i + size])
+        i += size
+    return [r for r in rows if r]
+
+
 def apply_updates(data, updates):
     """Merge parsed updates into the loaded YAML data dict."""
     for key in ('subheader', 'summary', 'core_competencies', 'technical_proficiencies'):
         if key in updates:
+            if key == 'technical_proficiencies':
+                # Flatten all items then split evenly across 2 rows
+                all_items = [item for row in updates[key] for item in row]
+                updates[key] = split_even_rows(all_items, 2)
             data[key] = updates[key]
             print(f"  Updated: {key}")
 
