@@ -398,9 +398,13 @@ def read_input():
     text_box.focus_set()
 
     # Submit button pinned at the bottom
-    btn = tk.Button(root, text="✅ Submit", font=("Arial", 14, "bold"),
-                    bg="#4CAF50", fg="white", height=2,
-                    command=lambda: [result.append(text_box.get("1.0", "end-1c")), root.destroy()])
+    def submit():
+        result.append(text_box.get("1.0", "end-1c"))
+        root.quit()
+        root.destroy()
+
+    btn = tk.Button(root, text="Submit", font=("Arial", 14, "bold"),
+                    bg="#4CAF50", fg="white", height=2, command=submit)
     btn.pack(fill="x", padx=10, pady=(0, 10))
 
     root.mainloop()
