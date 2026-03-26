@@ -384,7 +384,7 @@ def read_input():
     lines = []
     while True:
         line = input()
-        if line.strip().upper() == 'END':
+        if line == '' and lines and lines[-1] == '':
             break
         lines.append(line)
     return '\n'.join(lines)
