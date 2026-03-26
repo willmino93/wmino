@@ -191,8 +191,6 @@ Use the **full Calibri fonts from Microsoft Excel**:
 - Italic:  `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrii.ttf` → `fontname="CalibriIt"`
 - Bold:    `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrib.ttf` → `fontname="CalibriB"`
 
-**Important:** `insert_textbox` fails silently with these font files. Use `insert_centered` (defined in the Combined edit code below) for all centered sections — it calls `insert_text` with the x position computed via `fitz.Font.text_length()`.
-
 ### Subheader — known details
 
 - **Original text:** `Senior Data Analyst | eCommerce & Business Intelligence`
