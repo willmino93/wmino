@@ -297,7 +297,7 @@ os.replace('/tmp/resume_copy_out.pdf', dest)
 
 ## Updating Job Bullet Points
 
-**Critical rule:** When any bullet changes for a company, **always re-render ALL bullets for that company** from `resume.yaml`. Never edit individual bullets in isolation — doing so mixes the original embedded PDF font with the Excel TTF, causing alignment and spacing inconsistencies.
+**Critical rule:** When any bullet changes for a company, **always re-render ALL bullets for that company** from `resume.yaml`. Never edit individual bullets in isolation — doing so mixes the original embedded PDF font with the Excel TTF, causing alignment and spacing inconsistencies. Only render bullets that have non-empty text — skip any blank entries so no empty bullet markers appear in the PDF.
 
 ### Why full-section replacement
 
