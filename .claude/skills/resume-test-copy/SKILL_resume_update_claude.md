@@ -388,8 +388,8 @@ COMPANY_SECTIONS = {
 y_next_bullet = y_current + (n_lines_in_current_bullet + 1) × CALIBRI_LINE_HT
 ```
 
-- Single-line bullet → +2 × 14.648 = **+29.3 pt** (matches original PDF spacing exactly)
-- Two-line bullet  → +3 × 14.648 = **+43.9 pt** (auto-expands for long text)
+- Single-line bullet → +2 × 17.3 = **+34.6 pt**
+- Two-line bullet  → +3 × 17.3 = **+51.9 pt** (auto-expands for long text)
 
 **Overflow note:** If bullet content is too long or there are too many bullets, text will overflow into the next section. There is no automatic guard — keep the total content reasonable relative to the original.
 
