@@ -346,7 +346,7 @@ Each bullet (marker + text) is stored as one or more `q…Q` cm blocks in the co
 |---|---|---|---|---|
 | Bullet `●` (TrueCar) | `/System/Library/Fonts/Supplemental/Arial.ttf` | `"ArialNew"` | 11pt | 36.0 |
 | Bullet `●` (EKN / Pfizer / Tanabe) | same Arial.ttf | `"ArialNew"` | 12pt | 36.0 |
-| Bullet text (all companies) | `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf` | `"Calibri"` | 12pt | 45.7 (TrueCar) / 46.58 (EKN/Pfizer/Tanabe) |
+| Bullet text (all companies) | `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf` | `"Calibri"` | 12pt | 54.0 (all companies) |
 
 **Font metrics:**
 - `CALIBRI_ASCENDER = 9.0` — use this (not the Excel TTF metric of 11.426) to match original vertical positioning
