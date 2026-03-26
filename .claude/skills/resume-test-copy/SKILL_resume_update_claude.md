@@ -315,11 +315,6 @@ Each bullet (marker + text) is stored as one or more `q…Q` cm blocks in the co
 | Bullet `●` (EKN / Pfizer / Tanabe) | same Arial.ttf | `"ArialNew"` | 12pt | 36.0 |
 | Bullet text (all companies) | `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf` | `"Calibri"` | 12pt | 54.0 (all companies) |
 
-**Font metrics:**
-- `CALIBRI_ASCENDER = 9.0` — use this (not the Excel TTF metric of 11.426) to match original vertical positioning
-- `ARIAL11_ASCENDER = 9.958` (TrueCar)
-- `ARIAL12_ASCENDER = 10.863` (EKN, Pfizer, Tanabe)
-
 **Note on hyphens:** Calibri from Excel maps ASCII `-` (U+002D) to the Unicode hyphen `‐` (U+2010). Purely typographic — renders identically.
 
 ### Company section constants
