@@ -303,14 +303,16 @@ Each bullet entry (marker + text, including all continuation lines) is stored as
 |---|---|---|---|---|
 | Bullet `●` (TrueCar) | `/System/Library/Fonts/Supplemental/Arial.ttf` | `"ArialNew"` | 11pt | 36.0 |
 | Bullet `●` (EKN / Pfizer / Tanabe) | same Arial.ttf | `"ArialNew"` | 12pt | 36.0 |
-| Bullet text (all companies) | `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf` | `"Calibri"` | 12pt | 45.7 (TrueCar) / 46.6 (others) |
+| Bullet text (all companies) | `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf` | `"Calibri"` | 12pt | 45.7 (TrueCar) / 46.58 (EKN/Pfizer/Tanabe) |
 
-**Font metrics (Calibri 12pt):** ascender = 11.426 pt, line height = 14.648 pt
+**Font metrics (Calibri 12pt):** ascender = 11.426 pt (Excel TTF metric) — **use 9.0 pt** when aligning with original PDF text (embedded Calibri subset has different em-box metrics)
 **Font metrics (Arial 11pt):** ascender = 9.958 pt
 **Font metrics (Arial 12pt):** ascender = 10.863 pt
 
 **y_insert formula:** `y_insert = y_bbox_top_original + ascender`
 (`insert_text` takes a baseline coordinate; span bboxes give the top of the glyph)
+
+**Critical alignment note:** The Excel Calibri TTF ascender (11.426 pt) does NOT match the original PDF's embedded Calibri subset (~9.0 pt). Using 11.426 places text ~2.4 pt below the bullet marker baseline. Always use `CALIBRI_ASCENDER = 9.0` so bullet text baseline matches the Arial marker baseline. Equivalently: set `y_ins = y_marker + a_asc` (same y as the marker insert).
 
 **Note on hyphens:** Calibri from Excel maps ASCII `-` (U+002D) to the Unicode hyphen `‐` (U+2010). This is purely typographic — the glyph renders identically.
 
