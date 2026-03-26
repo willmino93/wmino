@@ -460,14 +460,15 @@ def render_company_section(doc, company, bullets):
         page.insert_text(fitz.Point(36.0, y + a_asc), "●",
             fontname="ArialNew", fontfile=arial,
             fontsize=cfg["arial_size"], color=(0, 0, 0))
-        # Text lines — all lines at same x_text (consistent indent, ~18pt gap from bullet)
+        # Text lines — all lines at same x_text (indent from bullet marker)
+        # If gap between ● and text looks too small, increase x_text in COMPANY_SECTIONS.
         for i, line in enumerate(lines):
             page.insert_text(
-                fitz.Point(x_text, y + CALIBRI_ASCENDER + i * CALIBRI_LINE_HT),
+                fitz.Point(x_text, y + CALIBRI_ASCENDER + i * CALIBRI_INNER_LINE_HT),
                 line, fontname="Calibri", fontfile=calibri_regular,
                 fontsize=12, color=(0, 0, 0))
-        # Advance y for next bullet: (n_lines + 1) × line_height
-        y += (len(lines) + 1) * CALIBRI_LINE_HT
+        # Advance y to next bullet: inner spacing for extra lines + fixed bullet advance
+        y += (len(lines) - 1) * CALIBRI_INNER_LINE_HT + CALIBRI_BULLET_ADVANCE
 
     return y  # actual y end — compare to cfg["original_y_end"] for reflow delta
 
