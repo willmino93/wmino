@@ -1,9 +1,9 @@
 """
 resume_updater_2.py
 
-Interactive CLI to update any section of Will Mino's resume.
-Prompts the user to select a section and input new content,
-updates resume.yaml, then generates a new timestamped PDF copy.
+Single-prompt resume updater. Paste all changes at once using labeled
+sections, then the script parses them, updates resume.yaml, and generates
+a new timestamped PDF copy.
 
 Usage:
     /Applications/anaconda3/bin/python3 resume_updater_2.py
@@ -61,12 +61,104 @@ STREAM_PATTERN = re.compile(
     re.DOTALL,
 )
 
-COMPANY_LABELS = {
-    "truecar": "TrueCar",
-    "ekn":     "EKN Engineering",
-    "pfizer":  "Pfizer",
-    "tanabe":  "Tanabe",
-}
+
+# ── Parsing ───────────────────────────────────────────────────────────────────
+
+# Each entry: (normalized label, internal key, section type)
+# Ordered longest-first so "ekn engineering" matches before "ekn",
+# and "core competencies" matches before a hypothetical shorter overlap.
+LABEL_MAP = [
+    ('technical proficiencies', 'technical_proficiencies', 'rows'),
+    ('technical_proficiencies', 'technical_proficiencies', 'rows'),
+    ('tech proficiencies',      'technical_proficiencies', 'rows'),
+    ('core competencies',       'core_competencies',       'rows'),
+    ('core_competencies',       'core_competencies',       'rows'),
+    ('ekn engineering',         'ekn',                     'bullets'),
+    ('subheader',               'subheader',               'string'),
+    ('summary',                 'summary',                 'string'),
+    ('truecar',                 'truecar',                 'bullets'),
+    ('true car',                'truecar',                 'bullets'),
+    ('ekn',                     'ekn',                     'bullets'),
+    ('pfizer',                  'pfizer',                  'bullets'),
+    ('tanabe',                  'tanabe',                  'bullets'),
+]
+
+BULLET_COMPANIES = {'truecar', 'ekn', 'pfizer', 'tanabe'}
+
+
+def match_label(line):
+    """Return (internal_key, section_type, inline_text) if line starts with a known label, else None."""
+    normalized = line.lower().strip()
+    for label, key, stype in LABEL_MAP:
+        prefix = label + ':'
+        if normalized.startswith(prefix):
+            inline = line[line.lower().find(prefix) + len(prefix):].strip()
+            return key, stype, inline
+    return None
+
+
+def parse_updates(text):
+    """
+    Parse labeled input into a dict of updates.
+    Only sections present in the input are included.
+    """
+    current_key  = None
+    current_type = None
+    inline       = ''
+    body_lines   = []
+    updates      = {}
+
+    def flush():
+        if current_key is None:
+            return
+        all_lines = []
+        if inline:
+            all_lines.append(inline)
+        all_lines.extend(ln for ln in body_lines if ln.strip())
+
+        if current_type == 'string':
+            updates[current_key] = ' '.join(all_lines)
+
+        elif current_type == 'rows':
+            rows = []
+            for ln in all_lines:
+                items = [x.strip() for x in ln.split(',') if x.strip()]
+                if items:
+                    rows.append(items)
+            updates[current_key] = rows
+
+        elif current_type == 'bullets':
+            bullets = []
+            for ln in all_lines:
+                b = ln.lstrip('-•').strip()
+                if b:
+                    bullets.append(b)
+            updates[current_key] = bullets
+
+    for line in text.split('\n'):
+        match = match_label(line)
+        if match:
+            flush()
+            current_key, current_type, inline = match
+            body_lines = []
+        elif current_key is not None:
+            body_lines.append(line)
+
+    flush()
+    return updates
+
+
+def apply_updates(data, updates):
+    """Merge parsed updates into the loaded YAML data dict."""
+    for key in ('subheader', 'summary', 'core_competencies', 'technical_proficiencies'):
+        if key in updates:
+            data[key] = updates[key]
+            print(f"  Updated: {key}")
+
+    for company in BULLET_COMPANIES:
+        if company in updates:
+            data['bullets'][company] = updates[company]
+            print(f"  Updated: bullets/{company}")
 
 
 # ── PDF helpers ───────────────────────────────────────────────────────────────
@@ -91,8 +183,8 @@ def get_target_xref(doc, page_num):
 
 
 def remove_cm_blocks(doc, page_num, y_min, y_max):
-    xref   = get_target_xref(doc, page_num)
-    stream = doc.xref_stream(xref).decode('latin-1')
+    xref    = get_target_xref(doc, page_num)
+    stream  = doc.xref_stream(xref).decode('latin-1')
     removed = []
 
     def replacer(m):
@@ -181,194 +273,6 @@ def render_company_section(doc, company, bullets, font_cal):
     return y
 
 
-# ── Interactive prompts ───────────────────────────────────────────────────────
-
-MAIN_MENU = """
-╔══════════════════════════════════════╗
-║       RESUME UPDATER — MAIN MENU     ║
-╠══════════════════════════════════════╣
-║  1. Subheader                        ║
-║  2. Summary                          ║
-║  3. Core Competencies                ║
-║  4. Technical Proficiencies          ║
-║  5. TrueCar bullets                  ║
-║  6. EKN Engineering bullets          ║
-║  7. Pfizer bullets                   ║
-║  8. Tanabe bullets                   ║
-╠══════════════════════════════════════╣
-║  9. Save YAML & generate PDF         ║
-║  0. Quit without saving              ║
-╚══════════════════════════════════════╝"""
-
-BULLET_HELP = """
-  Commands:
-    A       — Add a new bullet at the end
-    E <#>   — Edit bullet number # (e.g. "E 3")
-    D <#>   — Delete bullet number #
-    R       — Replace all bullets (enter fresh list)
-    K / ↵   — Keep as-is and return to main menu
-"""
-
-
-def _input(prompt=""):
-    """Thin wrapper so prompts are visually distinct."""
-    return input(prompt)
-
-
-def show_current(label, value):
-    print(f"\n  Current {label}:")
-    if isinstance(value, str):
-        print(f"    {value}")
-    elif isinstance(value, list):
-        for i, item in enumerate(value, 1):
-            if isinstance(item, list):
-                print(f"    Row {i}: {', '.join(item)}")
-            else:
-                print(f"    {i}. {item}")
-
-
-def edit_subheader(data):
-    show_current("Subheader", data["subheader"])
-    val = _input("\n  New subheader (Enter to keep): ").strip()
-    if val:
-        data["subheader"] = val
-        print(f"  ✓ Subheader updated.")
-    else:
-        print("  No change.")
-
-
-def edit_summary(data):
-    show_current("Summary", data["summary"])
-    print("  (Enter a single paragraph; press Enter with no text to keep current)")
-    val = _input("\n  New summary: ").strip()
-    if val:
-        data["summary"] = val
-        print("  ✓ Summary updated.")
-    else:
-        print("  No change.")
-
-
-def edit_row_section(data, key, label, max_rows):
-    """Generic editor for core_competencies and technical_proficiencies."""
-    current = data.get(key, [])
-    show_current(label, current)
-
-    print(f"\n  Enter items for each row as comma-separated values.")
-    print(f"  Press Enter to keep a row unchanged. Type 'clear' to remove a row.")
-    print(f"  (Max {max_rows} rows)\n")
-
-    new_rows = []
-    for i in range(max_rows):
-        current_row = current[i] if i < len(current) else []
-        row_display = ', '.join(current_row) if current_row else "empty"
-        raw = _input(f"  Row {i+1} [{row_display}]: ").strip()
-
-        if raw == '':
-            if current_row:
-                new_rows.append(current_row)
-            # else: row was already empty — skip it
-        elif raw.lower() == 'clear':
-            print(f"    Row {i+1} cleared.")
-        else:
-            items = [x.strip() for x in raw.split(',') if x.strip()]
-            if items:
-                new_rows.append(items)
-
-    data[key] = new_rows
-    print(f"  ✓ {label} updated ({len(new_rows)} row(s)).")
-
-
-def _parse_bullet_num(cmd_tail, bullets):
-    """Extract integer index from command tail or prompt the user."""
-    num_str = cmd_tail.strip()
-    if not num_str:
-        num_str = _input("  Bullet #: ").strip()
-    try:
-        idx = int(num_str) - 1
-        if 0 <= idx < len(bullets):
-            return idx
-        print(f"  Invalid number. Enter 1–{len(bullets)}.")
-    except ValueError:
-        print("  Please enter a valid number.")
-    return None
-
-
-def show_bullets(bullets):
-    if not bullets:
-        print("  (no bullets)")
-        return
-    for i, b in enumerate(bullets, 1):
-        print(f"  {i}. {b}")
-
-
-def edit_bullets(data, company):
-    label   = COMPANY_LABELS[company]
-    bullets = list(data["bullets"].get(company, []))
-
-    print(f"\n  ── {label} ──")
-    show_bullets(bullets)
-    print(BULLET_HELP)
-
-    while True:
-        raw = _input("  Action: ").strip()
-        cmd = raw.upper()
-
-        # Keep / done
-        if cmd in ('', 'K'):
-            break
-
-        # Add
-        elif cmd == 'A':
-            text = _input("  New bullet text: ").strip()
-            if text:
-                bullets.append(text)
-                print(f"  ✓ Added as bullet {len(bullets)}.")
-                show_bullets(bullets)
-
-        # Edit
-        elif cmd.startswith('E'):
-            idx = _parse_bullet_num(cmd[1:], bullets)
-            if idx is not None:
-                print(f"  Current: {bullets[idx]}")
-                text = _input("  New text (Enter to cancel): ").strip()
-                if text:
-                    bullets[idx] = text
-                    print(f"  ✓ Bullet {idx+1} updated.")
-                    show_bullets(bullets)
-
-        # Delete
-        elif cmd.startswith('D'):
-            idx = _parse_bullet_num(cmd[1:], bullets)
-            if idx is not None:
-                removed = bullets.pop(idx)
-                print(f"  ✓ Deleted: {removed}")
-                show_bullets(bullets)
-
-        # Replace all
-        elif cmd == 'R':
-            print("  Enter bullets one per line. Empty line when done.")
-            new_bullets = []
-            while True:
-                line = _input(f"  [{len(new_bullets)+1}]: ").strip()
-                if not line:
-                    break
-                new_bullets.append(line)
-            if new_bullets:
-                bullets = new_bullets
-                print(f"  ✓ Replaced with {len(bullets)} bullet(s).")
-                show_bullets(bullets)
-            else:
-                print("  No bullets entered — keeping original.")
-
-        else:
-            print("  Unknown command. Use A, E <#>, D <#>, R, or K.")
-
-    data["bullets"][company] = bullets
-    print(f"  ✓ {label} bullets saved.")
-
-
-# ── PDF generation (same logic as resume_updater.py) ─────────────────────────
-
 def generate_pdf(data):
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     dest      = os.path.join(BASE_DIR, f'Will Mino - Resume_copy_{timestamp}.pdf')
@@ -390,7 +294,6 @@ def generate_pdf(data):
     tech_proficiencies = data.get("technical_proficiencies", [])
     bullets            = data.get("bullets", {})
 
-    # Remove header cm blocks
     print("\nRemoving header section cm blocks (page 0)...")
     removed_sub = remove_cm_blocks(doc, 0, y_min=98,  y_max=101)
     removed_sum = remove_cm_blocks(doc, 0, y_min=118, y_max=121)
@@ -401,13 +304,11 @@ def generate_pdf(data):
     print(f"  Core Comp cm blocks removed: {removed_cc}")
     print(f"  Tech Prof cm blocks removed: {removed_tp}")
 
-    # Render company bullet sections
     print("\nRendering company bullet sections...")
-
     render_company_section(doc, "truecar", bullets.get("truecar", []), font_cal)
 
-    ekn_y_end  = render_company_section(doc, "ekn", bullets.get("ekn", []), font_cal)
-    delta_ekn  = ekn_y_end - COMPANY_SECTIONS["ekn"]["original_y_end"]
+    ekn_y_end = render_company_section(doc, "ekn", bullets.get("ekn", []), font_cal)
+    delta_ekn = ekn_y_end - COMPANY_SECTIONS["ekn"]["original_y_end"]
     if delta_ekn != 0:
         print(f"  EKN delta={delta_ekn:+.2f} — reflowing Pfizer header...")
         shift_blocks_in_y_range(doc, 1, y_lo=300, y_hi=345, delta=delta_ekn)
@@ -415,13 +316,12 @@ def generate_pdf(data):
 
     render_company_section(doc, "pfizer", bullets.get("pfizer", []), font_cal)
 
-    tanabe_y_end  = render_company_section(doc, "tanabe", bullets.get("tanabe", []), font_cal)
-    delta_tanabe  = tanabe_y_end - COMPANY_SECTIONS["tanabe"]["original_y_end"]
+    tanabe_y_end = render_company_section(doc, "tanabe", bullets.get("tanabe", []), font_cal)
+    delta_tanabe = tanabe_y_end - COMPANY_SECTIONS["tanabe"]["original_y_end"]
     if delta_tanabe != 0:
         print(f"  Tanabe delta={delta_tanabe:+.2f} — reflowing Education/Awards...")
         shift_blocks_in_y_range(doc, 2, y_lo=200, y_hi=400, delta=delta_tanabe)
 
-    # Insert header text
     print("\nInserting header section text...")
     page0 = doc[0]
 
@@ -454,44 +354,61 @@ def generate_pdf(data):
     print(f"\nSaved: {dest}")
 
 
-# ── Main loop ─────────────────────────────────────────────────────────────────
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+INSTRUCTIONS = """
+Enter your resume updates below using section labels.
+Only the sections you include will be updated — everything else stays the same.
+Type END on its own line when finished.
+
+  Subheader:              text on the same line
+  Summary:                text on the same line (or next line)
+  Core Competencies:      one row per line, items comma-separated (max 4 rows)
+  Technical Proficiencies: one row per line, items comma-separated (max 2 rows)
+  TrueCar:                one bullet per line, leading dash optional
+  EKN Engineering:        one bullet per line
+  Pfizer:                 one bullet per line
+  Tanabe:                 one bullet per line
+
+Example:
+  Subheader: Senior Data Analyst | 9 Years Experience
+  TrueCar:
+  - Led pricing analytics for OEM incentive programs.
+  - Built dashboards tracking $7M in annual revenue.
+──────────────────────────────────────────────────────
+"""
+
+
+def read_input():
+    print(INSTRUCTIONS)
+    lines = []
+    while True:
+        line = input()
+        if line.strip().upper() == 'END':
+            break
+        lines.append(line)
+    return '\n'.join(lines)
+
 
 def main():
     data = load_yaml(YAML_WORKING)
     print("Loaded resume.yaml")
 
-    while True:
-        print(MAIN_MENU)
-        choice = _input("  Enter choice: ").strip()
+    raw = read_input()
+    updates = parse_updates(raw)
 
-        if choice == '1':
-            edit_subheader(data)
-        elif choice == '2':
-            edit_summary(data)
-        elif choice == '3':
-            edit_row_section(data, "core_competencies", "Core Competencies", max_rows=4)
-        elif choice == '4':
-            edit_row_section(data, "technical_proficiencies", "Technical Proficiencies", max_rows=2)
-        elif choice == '5':
-            edit_bullets(data, "truecar")
-        elif choice == '6':
-            edit_bullets(data, "ekn")
-        elif choice == '7':
-            edit_bullets(data, "pfizer")
-        elif choice == '8':
-            edit_bullets(data, "tanabe")
-        elif choice == '9':
-            print("\nSaving resume.yaml...")
-            save_yaml(YAML_WORKING, data)
-            print("Saved.")
-            generate_pdf(data)
-            print("\nDone.")
-            break
-        elif choice == '0':
-            print("\nQuitting without saving.")
-            break
-        else:
-            print("  Invalid choice — enter 0–9.")
+    if not updates:
+        print("\nNo recognized sections found — nothing to update.")
+        return
+
+    print("\nApplying updates...")
+    apply_updates(data, updates)
+
+    print("\nSaving resume.yaml...")
+    save_yaml(YAML_WORKING, data)
+
+    generate_pdf(data)
+    print("\nDone.")
 
 
 if __name__ == "__main__":
