@@ -343,7 +343,7 @@ BULLETS = {
         ],
     },
     "ekn": {
-        "page": 1, "x_text": 46.6, "arial_size": 12,
+        "page": 1, "x_text": 46.58, "arial_size": 12,
         "entries": [
             (86,  125,   98.1,  99.9),   # bullet 1
             (125, 154,  127.4, 129.2),   # bullet 2
