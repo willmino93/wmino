@@ -358,18 +358,18 @@ def generate_pdf(data):
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 INSTRUCTIONS = """
-Enter your resume updates below using section labels.
+Paste your resume updates below using section labels.
 Only the sections you include will be updated — everything else stays the same.
-When finished, press Ctrl+D (on Mac/Linux) to submit.
+When finished, type END on its own line and press Enter.
 
-  Subheader:              text on the same line
-  Summary:                text on the same line (or next line)
-  Core Competencies:      one row per line, items comma-separated (max 4 rows)
+  Subheader:               text on the same line
+  Summary:                 text on the same line (or next line)
+  Core Competencies:       one row per line, items comma-separated (max 4 rows)
   Technical Proficiencies: one row per line, items comma-separated (max 2 rows)
-  TrueCar:                one bullet per line, leading dash optional
-  EKN Engineering:        one bullet per line
-  Pfizer:                 one bullet per line
-  Tanabe:                 one bullet per line
+  TrueCar:                 one bullet per line, leading dash optional
+  EKN Engineering:         one bullet per line
+  Pfizer:                  one bullet per line
+  Tanabe:                  one bullet per line
 
 Example:
   Subheader: Senior Data Analyst | 9 Years Experience
@@ -382,7 +382,13 @@ Example:
 
 def read_input():
     print(INSTRUCTIONS)
-    return sys.stdin.read()
+    lines = []
+    while True:
+        line = input()
+        if line.strip().upper() == 'END':
+            break
+        lines.append(line)
+    return '\n'.join(lines)
 
 
 def main():
