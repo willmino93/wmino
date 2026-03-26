@@ -325,8 +325,8 @@ CALIBRI_ASCENDER = 9.0
 # CALIBRI_BULLET_ADVANCE: y-advance from start of one bullet to start of next (single-line case).
 # Both derived from original PDF measurements (run the diagnostic above to verify/recalibrate).
 # Excel Calibri TTF bbox height at 12pt = 14.640pt (original PDF's embedded Calibri = 12.000pt).
-CALIBRI_INNER_LINE_HT  = 17.3
-CALIBRI_BULLET_ADVANCE = 17.3
+CALIBRI_INNER_LINE_HT  = 14.65
+CALIBRI_BULLET_ADVANCE = 14.65
 ARIAL11_ASCENDER =  9.958
 ARIAL12_ASCENDER = 10.863
 
