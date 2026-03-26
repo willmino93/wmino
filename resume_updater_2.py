@@ -385,19 +385,23 @@ def read_input():
 
     root = tk.Tk()
     root.title("Resume Updater")
-    root.geometry("700x500")
+    root.geometry("700x600")
+    root.resizable(True, True)
 
-    tk.Label(root, text=INSTRUCTIONS, justify="left", font=("Courier", 11)).pack(padx=10, pady=(10, 0))
+    # Instructions label at top
+    tk.Label(root, text=INSTRUCTIONS, justify="left", font=("Courier", 10"),
+             anchor="w").pack(fill="x", padx=10, pady=(10, 0))
 
-    text_box = tk.Text(root, font=("Courier", 12), wrap="word")
+    # Text box in the middle
+    text_box = tk.Text(root, font=("Courier", 12), wrap="word", height=15)
     text_box.pack(fill="both", expand=True, padx=10, pady=10)
     text_box.focus_set()
 
-    def submit():
-        result.append(text_box.get("1.0", "end-1c"))
-        root.destroy()
-
-    tk.Button(root, text="Submit", command=submit, font=("Arial", 13), bg="#4CAF50", fg="white").pack(pady=(0, 10))
+    # Submit button pinned at the bottom
+    btn = tk.Button(root, text="✅ Submit", font=("Arial", 14, "bold"),
+                    bg="#4CAF50", fg="white", height=2,
+                    command=lambda: [result.append(text_box.get("1.0", "end-1c")), root.destroy()])
+    btn.pack(fill="x", padx=10, pady=(0, 10))
 
     root.mainloop()
     return result[0] if result else ""
