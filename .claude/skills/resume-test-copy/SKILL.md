@@ -321,7 +321,7 @@ Each bullet entry (marker + text, including all continuation lines) is stored as
 All values are derived from the **original** `Will Mino - Resume.pdf` and remain stable as long as the original is not rebuilt.
 
 ```python
-CALIBRI_ASCENDER = 11.426
+CALIBRI_ASCENDER = 9.0   # matches original PDF embedded Calibri em-box (NOT the Excel TTF metric of 11.426)
 CALIBRI_LINE_HT  = 14.648
 ARIAL11_ASCENDER =  9.958   # TrueCar
 ARIAL12_ASCENDER = 10.863   # EKN, Pfizer, Tanabe
