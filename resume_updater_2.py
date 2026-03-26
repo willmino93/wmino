@@ -400,8 +400,7 @@ def read_input():
     # Submit button pinned at the bottom
     def submit():
         result.append(text_box.get("1.0", "end-1c"))
-        root.quit()
-        root.destroy()
+        root.after(1, root.destroy)
 
     btn = tk.Button(root, text="Submit", font=("Arial", 14, "bold"),
                     bg="#4CAF50", fg="white", height=2, command=submit)
