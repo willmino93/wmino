@@ -359,7 +359,10 @@ Each bullet (marker + text) is stored as one or more `q…Q` cm blocks in the co
 
 ```python
 CALIBRI_ASCENDER = 9.0
-CALIBRI_LINE_HT  = 14.648
+# Excel Calibri TTF bbox height at 12pt = 14.640pt (original PDF's embedded Calibri = 12.000pt).
+# CALIBRI_LINE_HT = 17.3 creates ~2.65pt visual gap between lines, matching the original PDF appearance.
+# (formula: 14.640 + 2.648_original_gap = 17.288 → rounded to 17.3)
+CALIBRI_LINE_HT  = 17.3
 ARIAL11_ASCENDER =  9.958
 ARIAL12_ASCENDER = 10.863
 
