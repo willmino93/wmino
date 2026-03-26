@@ -70,14 +70,21 @@ Generate a unique filename and copy the source. Store the path in a variable —
 import shutil, os
 from datetime import datetime
 
-src      = '/Users/willmino/Library/Claude/Resume_Github_Project/Will Mino - Resume.pdf'
-dest_dir = '/Users/willmino/Library/Claude/Resume_Github_Project'
+src           = '/Users/willmino/Library/Claude/Resume_Github_Project/Will Mino - Resume.pdf'
+yaml_original = '/Users/willmino/Library/Claude/Resume_Github_Project/resume_original.yaml'
+dest_dir      = '/Users/willmino/Library/Claude/Resume_Github_Project'
 
 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-dest = os.path.join(dest_dir, f'Will Mino - Resume_copy_{timestamp}.pdf')
+dest      = os.path.join(dest_dir, f'Will Mino - Resume_copy_{timestamp}.pdf')
+dest_yaml = os.path.join(dest_dir, f'resume_copy_{timestamp}.yaml')
+
 shutil.copy(src, dest)
+shutil.copy(yaml_original, dest_yaml)
 print(f"Created: {os.path.basename(dest)}")
-# Store dest — all further steps write to this path
+print(f"Created: {os.path.basename(dest_yaml)}")
+# Store dest and dest_yaml — all further steps write to these same paths.
+# After applying edits, update dest_yaml to match the final state of the copy
+# (same values written to resume.yaml in Step 0d).
 ```
 
 ## Step 2 — Extract font info from the copy
