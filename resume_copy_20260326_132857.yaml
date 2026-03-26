@@ -1,0 +1,58 @@
+subheader: "Senior Data Analyst | eCommerce & Business Intelligence"
+
+summary: >-
+  Results-driven Senior Data Analyst with 9 years of experience turning complex eCommerce, product, and
+  business data into actionable insights through end-to-end analytics pipelines. Expertise in SQL, Python,
+  Tableau, Power BI, Excel, and modern BI & AI tools (Cursor, Claude Opus). Skilled in funnel analysis, process
+  optimization, and advanced data analytics. Proven ability to translate complex datasets into business decisions
+  and drive measurable outcomes across cross-functional teams.
+  Industries: Automotive, Biotechnology, Public Utilities
+
+# Each row is displayed as: • item1  • item2  • item3 (centered, Calibri Italic 12pt)
+# Max 4 rows (grey stripe rows at y: 269, 286, 303, 320)
+core_competencies:
+  - ["Funnel & Conversion Analysis", "Marketing & Revenue Analytics", "Data Modeling"]
+  - ["A/B Testing", "Data Analysis & Visualization", "Data Cleaning & Transformation"]
+  - ["Dashboards and BI Tools", "Big Data & Cloud Tools", "Project Management"]
+  - ["Root Cause Analysis", "Stakeholder Management", "Collaboration & Communication"]
+
+# Each row displayed as: • item1  • item2  • item3 (centered, Calibri Italic 12pt)
+# Max 2 rows (grey stripe rows at y: 371, 388)
+technical_proficiencies:
+  - ["AWS", "Amazon Redshift", "Data Pipelines", "SQL", "Python", "Excel", "Tableau", "Power BI"]
+  - ["Salesforce", "SAP", "Google Analytics", "Claude Opus"]
+
+bullets:
+  truecar:
+    - "Designed scalable SQL datasets and reporting tables in Amazon Redshift to support automated dashboards and end-to-end business performance tracking."
+    - "Partnered with Product, Sales, and Business stakeholders to evaluate the impact of pricing, incentives, and marketplace changes using statistical analysis and experimentation frameworks."
+    - "Translated complex data into actionable business insights for stakeholders, supporting data-informed decision-making."
+    - "Leveraged AI tools like Cursor and Claude Opus to optimize SQL queries and perform ad hoc data pulls."
+    - "Developed dashboards monitoring program performance, revenue outcomes, and user behavior for operational transparency."
+    - "Streamlined reporting and data cleaning processes, reducing manual effort and accelerating insight delivery."
+    - "Owned reporting for OEM incentive programs generating $7M annually, ensuring accurate tracking, reconciliation, and downstream reporting integrity."
+    - "Delivered insights to regain a key client, recovering $500K in annual recurring revenue through targeted performance analysis."
+    - "Created Python scripts to accelerate data entry and export workflows, enhancing team productivity."
+
+  ekn:
+    - "Analyzed operational workflows from data ingestion through final delivery, identifying inefficiencies, data gaps, and process breakdowns."
+    - "Developed dashboards to monitor field crew activities and job changes through app messaging and equipment data, streamlining field operations and driving efficiency and cost savings."
+    - "Built automated tracking and analytics tools using SQL, Excel VBA, Python, and SAP to improve operational visibility and enable data-driven decision-making."
+    - "Supported ad hoc financial and business analyses, enabling strategic decision-making across client-facing programs."
+    - "Conducted root cause investigations for data discrepancies, ensuring confidence in downstream financial and operational reporting."
+    - "Collaborated with cross-functional teams to define KPIs, reporting requirements, and metrics for performance tracking."
+    - "Delivered insights leading to $120K in cost reductions and improved operational efficiency."
+
+  pfizer:
+    - "Contributed to cancer research through advanced data analysis, training junior scientists, and comprehensive data reporting."
+    - "Designed and implemented streamlined processes for data generation, transformation, and visualization, improving accuracy and efficiency."
+    - "Led and coordinated early-stage research projects, performing laboratory work and presenting findings to key stakeholders."
+    - "Utilized project management methodologies to accelerate milestone completion and improve research outcomes."
+    - "Applied automation and algorithmic approaches to optimize high-throughput screening assays, increasing efficiency by 50%."
+    - "Managed and allocated research project budgets ranging from $30,000 to $50,000, ensuring strategic investment in cutting-edge technologies."
+
+  tanabe:
+    - "Conducted research on cancer therapies, successfully integrating research projects into the clinical portfolio."
+    - "Facilitated the advancement of 25% of early-stage cancer research projects."
+    - "Delivered company-wide presentations to communicate research progress and key findings."
+    - "Managed project expenditures, maintaining an annual spending limit of $50,000 while ensuring adherence to budget constraints."
