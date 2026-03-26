@@ -267,32 +267,28 @@ page = doc[0]
 font_it   = fitz.Font(fontfile=calibri_italic)
 font_bold = fitz.Font(fontfile=calibri_bold)
 
-def insert_centered_italic(text, y):
-    width = font_it.text_length(text, fontsize=12)
-    x = 36.0 + (540.0 - width) / 2
+def insert_centered(text, y, font_obj, fontname, fontfile, fontsize=12):
+    width = font_obj.text_length(text, fontsize=fontsize)
+    x = 36.0 + (540.0 - width) / 2   # content area: x=36 to x=576, width=540
     page.insert_text(fitz.Point(x, y), text,
-        fontname="CalibriIt", fontfile=calibri_italic,
-        fontsize=12, color=(0, 0, 0))
+        fontname=fontname, fontfile=fontfile,
+        fontsize=fontsize, color=(0, 0, 0))
 
-# Subheader — centered, Calibri-Bold 16pt, y_insert=118.683
-new_subheader = "Your new subheader text here"
-width_b = font_bold.text_length(new_subheader, fontsize=16)
-x_sub   = 36.0 + (540.0 - width_b) / 2
-page.insert_text(fitz.Point(x_sub, 118.683), new_subheader,
-    fontname="CalibriB", fontfile=calibri_bold, fontsize=16, color=(0, 0, 0))
+# Subheader — centered, Calibri-Bold 16pt, y=118.683
+insert_centered("Your new subheader text here", 118.683, font_bold, "CalibriB", calibri_bold, fontsize=16)
 
-# Summary — left-aligned, Calibri Regular, y=144.0
+# Summary — left-aligned, Calibri Regular, x=36.0, y=144.0
 page.insert_text(fitz.Point(36.0, 144.0), "Replacement summary text here",
     fontname="Calibri", fontfile=calibri_regular, fontsize=12, color=(0, 0, 0))
 
-# Core Competencies — centered, Calibri Italic (add/remove rows as needed)
-insert_centered_italic('• item1  • item2', 269.0)
-insert_centered_italic('• item3  • item4', 286.0)
-insert_centered_italic('• item5',          303.0)
+# Core Competencies — centered, Calibri Italic 12pt, y rows: 269.0, 286.0, 303.0 (add/remove as needed)
+insert_centered('• item1  • item2', 269.0, font_it, "CalibriIt", calibri_italic)
+insert_centered('• item3  • item4', 286.0, font_it, "CalibriIt", calibri_italic)
+insert_centered('• item5',          303.0, font_it, "CalibriIt", calibri_italic)
 
-# Technical Proficiencies — centered, Calibri Italic
-insert_centered_italic('• item1  • item2  • item3', 371.0)
-insert_centered_italic('• item4  • item5',          388.0)
+# Technical Proficiencies — centered, Calibri Italic 12pt, y rows: 371.0, 388.0
+insert_centered('• item1  • item2  • item3', 371.0, font_it, "CalibriIt", calibri_italic)
+insert_centered('• item4  • item5',          388.0, font_it, "CalibriIt", calibri_italic)
 
 doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 doc.close()
