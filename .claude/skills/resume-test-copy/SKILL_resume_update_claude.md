@@ -200,7 +200,6 @@ Use the **full Calibri fonts from Microsoft Excel**:
 - **Font:** Calibri-Bold, 16pt, black, **centered**
 - **Calibri-Bold ascender at 16pt:** 15.234 pt
 - **y_insert:** `103.449 + 15.234 = 118.683` (bbox_top + ascender)
-- **Centering formula:** `x = 36.0 + (540.0 - font.text_length(text, fontsize=16)) / 2`
 
 ```python
 calibri_bold = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrib.ttf'
@@ -214,34 +213,9 @@ def replacer(m):
 stream = stream_pattern.sub(replacer, stream)
 doc.update_stream(target_xref, stream.encode('latin-1'))
 
-# Insert new subheader
+# Insert new subheader — centered, Calibri-Bold 16pt, y=118.683
 font_bold = fitz.Font(fontfile=calibri_bold)
-new_subheader = "Your new subheader text here"
-width    = font_bold.text_length(new_subheader, fontsize=16)
-x_center = 36.0 + (540.0 - width) / 2
-page.insert_text(
-    fitz.Point(x_center, 118.683),
-    new_subheader,
-    fontname="CalibriB", fontfile=calibri_bold,
-    fontsize=16, color=(0, 0, 0)
-)
-```
-
-### Centering helper (Calibri Italic — for Core Competencies / Technical Proficiencies)
-
-```python
-font_obj = fitz.Font(fontfile='/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrii.ttf')
-
-def insert_centered(page, text, y, fontsize=12):
-    width = font_obj.text_length(text, fontsize=fontsize)
-    x = 36.0 + (540.0 - width) / 2   # content area: x=36 to x=576, width=540
-    page.insert_text(
-        fitz.Point(x, y),
-        text,
-        fontname="CalibriIt",
-        fontfile='/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrii.ttf',
-        fontsize=fontsize, color=(0, 0, 0)
-    )
+insert_centered("Your new subheader text here", 118.683, font_bold, "CalibriB", calibri_bold, fontsize=16)
 ```
 
 ### Core Competencies — known details
