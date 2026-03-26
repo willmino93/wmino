@@ -14,8 +14,8 @@ core_competencies:
 # Each row displayed as: • item1  • item2  • item3 (centered, Calibri Italic 12pt)
 # Max 2 rows (grey stripe rows at y: 371, 388)
 technical_proficiencies:
-  - ["AWS", "Amazon Redshift", "Data Pipelines", "SQL", "Python", "Excel", "Tableau", "Power BI"]
-  - ["Salesforce", "SAP", "Google Analytics", "Claude Opus"]
+  - ["SQL", "Python", "Tableau", "Excel", "Friendliness", "Good Communication"]
+  - ["Good Vibes", "Good things to eat", "Power BI"]
 
 bullets:
   truecar:
