@@ -330,14 +330,15 @@ os.replace('/tmp/resume_copy_out.pdf', dest)
 
 ## Updating Job Bullet Points
 
-This method is **distinct** from the Summary / Core Competencies / Technical Proficiencies method.
-Use it whenever the user asks to change bullet-point text under any of the four jobs.
+**Critical rule:** When any bullet changes for a company, **always re-render ALL bullets for that company** from `resume.yaml`. Never edit individual bullets in isolation — doing so mixes the original embedded PDF font with the Excel TTF, causing alignment and spacing inconsistencies.
+
+### Why full-section replacement
+
+The original PDF bullets use an embedded Calibri subset with different em-box metrics than the full Excel Calibri TTF. Replacing only some bullets creates a font system mismatch. Replacing all bullets in one pass means every bullet uses the same font/metrics → consistent alignment and spacing throughout.
 
 ### How bullets are stored in the PDF
 
-Each bullet entry (marker + text, including all continuation lines) is stored as **one or more `q…Q` cm blocks** in the content stream. Bullet markers (`●`, U+25CF) and the text span are in the **same block** — they cannot be separated via stream manipulation. The text is in CIDFont encoding (Identity-H), not plain ASCII, so it cannot be substituted in-place.
-
-**Method:** surgically remove the cm block(s) for a bullet, then re-insert both the bullet marker and new text using `insert_text`.
+Each bullet (marker + text) is stored as one or more `q…Q` cm blocks in the content stream. The text is in CIDFont encoding (Identity-H) — it cannot be edited in-place. The method is: remove all cm blocks for the company's y-range, then re-render all bullets from scratch.
 
 ### Font + rendering details
 
@@ -347,95 +348,61 @@ Each bullet entry (marker + text, including all continuation lines) is stored as
 | Bullet `●` (EKN / Pfizer / Tanabe) | same Arial.ttf | `"ArialNew"` | 12pt | 36.0 |
 | Bullet text (all companies) | `/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf` | `"Calibri"` | 12pt | 45.7 (TrueCar) / 46.58 (EKN/Pfizer/Tanabe) |
 
-**Font metrics (Calibri 12pt):** ascender = 11.426 pt (Excel TTF metric) — **use 9.0 pt** when aligning with original PDF text (embedded Calibri subset has different em-box metrics)
-**Font metrics (Arial 11pt):** ascender = 9.958 pt
-**Font metrics (Arial 12pt):** ascender = 10.863 pt
+**Font metrics:**
+- `CALIBRI_ASCENDER = 9.0` — use this (not the Excel TTF metric of 11.426) to match original vertical positioning
+- `ARIAL11_ASCENDER = 9.958` (TrueCar)
+- `ARIAL12_ASCENDER = 10.863` (EKN, Pfizer, Tanabe)
 
-**y_insert formula:** `y_insert = y_bbox_top_original + ascender`
-(`insert_text` takes a baseline coordinate; span bboxes give the top of the glyph)
+**Note on hyphens:** Calibri from Excel maps ASCII `-` (U+002D) to the Unicode hyphen `‐` (U+2010). Purely typographic — renders identically.
 
-**Critical alignment note:** The Excel Calibri TTF ascender (11.426 pt) does NOT match the original PDF's embedded Calibri subset (~9.0 pt). Using 11.426 places text ~2.4 pt below the bullet marker baseline. Always use `CALIBRI_ASCENDER = 9.0` so bullet text baseline matches the Arial marker baseline. Equivalently: set `y_ins = y_marker + a_asc` (same y as the marker insert).
-
-**Note on hyphens:** Calibri from Excel maps ASCII `-` (U+002D) to the Unicode hyphen `‐` (U+2010). This is purely typographic — the glyph renders identically.
-
-### Bullet position map (all companies)
-
-All values are derived from the **original** `Will Mino - Resume.pdf` and remain stable as long as the original is not rebuilt.
+### Company section constants
 
 ```python
-CALIBRI_ASCENDER = 9.0   # matches original PDF embedded Calibri em-box (NOT the Excel TTF metric of 11.426)
+CALIBRI_ASCENDER = 9.0
 CALIBRI_LINE_HT  = 14.648
-ARIAL11_ASCENDER =  9.958   # TrueCar
-ARIAL12_ASCENDER = 10.863   # EKN, Pfizer, Tanabe
+ARIAL11_ASCENDER =  9.958
+ARIAL12_ASCENDER = 10.863
 
-BULLETS = {
-    "truecar": {
-        "page": 0, "x_text": 45.7, "arial_size": 11,
-        # entries: (cm_y_lo, cm_y_hi,  y_marker_fitz_top, y_text_fitz_top)
-        "entries": [
-            (453, 492,  465.8, 466.8),   # bullet 1
-            (492, 521,  495.1, 496.1),   # bullet 2
-            (521, 551,  524.4, 525.4),   # bullet 3
-            (551, 565,  553.7, 554.6),   # bullet 4
-            (565, 594,  568.3, 569.3),   # bullet 5
-            (594, 624,  597.6, 598.6),   # bullet 6
-            (624, 653,  626.9, 627.9),   # bullet 7
-            (653, 682,  656.2, 657.2),   # bullet 8
-            (682, 740,  685.5, 686.5),   # bullet 9 (includes trailing empty blocks)
-        ],
-    },
-    "ekn": {
-        "page": 1, "x_text": 46.58, "arial_size": 12,
-        "entries": [
-            (86,  125,   98.1,  99.9),   # bullet 1
-            (125, 154,  127.4, 129.2),   # bullet 2
-            (154, 184,  156.6, 158.5),   # bullet 3
-            (184, 213,  185.9, 187.8),   # bullet 4
-            (213, 242,  215.2, 217.1),   # bullet 5
-            (242, 272,  244.5, 246.4),   # bullet 6
-            (272, 300,  273.8, 275.7),   # bullet 7
-        ],
-    },
-    "pfizer": {
-        "page": 1, "x_text": 46.58, "arial_size": 12,
-        "entries": [
-            (345, 384,  357.1, 358.9),   # bullet 1
-            (384, 413,  386.4, 388.2),   # bullet 2
-            (413, 443,  415.7, 417.5),   # bullet 3
-            (443, 472,  445.0, 446.8),   # bullet 4
-            (472, 501,  474.3, 476.1),   # bullet 5
-            (501, 545,  503.6, 505.4),   # bullet 6
-        ],
-    },
-    "tanabe": {
-        "page": 2, "x_text": 46.58, "arial_size": 12,
-        "entries": [
-            (86,  125,   98.1,  99.9),   # bullet 1
-            (125, 140,  127.4, 129.2),   # bullet 2
-            (140, 154,  142.0, 143.9),   # bullet 3
-            (154, 200,  156.6, 158.5),   # bullet 4
-        ],
-    },
+# y_range: full cm y-range to remove all original bullets for this company
+# y_start: y_marker_fitz_top of the FIRST bullet (anchor for dynamic rendering)
+COMPANY_SECTIONS = {
+    "truecar": {"page": 0, "y_range": (453, 740), "y_start": 465.8,
+                "x_text": 45.7,  "arial_size": 11, "wrap_width": 530.0},
+    "ekn":     {"page": 1, "y_range": ( 86, 300), "y_start":  98.1,
+                "x_text": 46.58, "arial_size": 12, "wrap_width": 529.0},
+    "pfizer":  {"page": 1, "y_range": (345, 545), "y_start": 357.1,
+                "x_text": 46.58, "arial_size": 12, "wrap_width": 529.0},
+    "tanabe":  {"page": 2, "y_range": ( 86, 200), "y_start":  98.1,
+                "x_text": 46.58, "arial_size": 12, "wrap_width": 529.0},
 }
 ```
 
-### Bullet update function
+### Dynamic y-spacing formula
+
+```
+y_next_bullet = y_current + (n_lines_in_current_bullet + 1) × CALIBRI_LINE_HT
+```
+
+- Single-line bullet → +2 × 14.648 = **+29.3 pt** (matches original PDF spacing exactly)
+- Two-line bullet  → +3 × 14.648 = **+43.9 pt** (auto-expands for long text)
+
+**Overflow note:** If bullet content is too long or there are too many bullets, text will overflow into the next section. There is no automatic guard — keep the total content reasonable relative to the original.
+
+### `render_company_section()` function
 
 ```python
 import fitz, os, re
 
-calibri = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf'
-arial   = '/System/Library/Fonts/Supplemental/Arial.ttf'
-
-# (paste BULLETS dict and constants from above)
+calibri_regular = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf'
+arial           = '/System/Library/Fonts/Supplemental/Arial.ttf'
 
 stream_pattern = re.compile(
     r'\nq\n\.75 0 0 \.75 36 ([\d.]+) cm\n0 0 0 RG 0 0 0 rg\n.*?\nQ',
     re.DOTALL
 )
-font_cal = fitz.Font(fontfile=calibri)
+font_cal = fitz.Font(fontfile=calibri_regular)
 
-def wrap_text(text, max_width=533.0, fontsize=12):
+def wrap_text(text, max_width=529.0, fontsize=12):
     words = text.split()
     lines, cur = [], ""
     for w in words:
@@ -448,60 +415,57 @@ def wrap_text(text, max_width=533.0, fontsize=12):
     if cur: lines.append(cur)
     return lines
 
-def update_bullets(doc, company, new_texts):
-    """Replace bullet text for a company.
-    new_texts: list of strings, one per bullet (in order).
-    Only bullets with a corresponding entry in new_texts are replaced.
+def render_company_section(doc, company, bullets):
+    """Remove all original bullets for a company and re-render from the provided list.
+    bullets: complete list of bullet strings from resume.yaml — any count is supported.
     """
-    cfg    = BULLETS[company]
-    x      = cfg["x_text"]
-    a_size = cfg["arial_size"]
-    a_asc  = ARIAL11_ASCENDER if a_size == 11 else ARIAL12_ASCENDER
-    pg     = doc[cfg["page"]]
+    cfg    = COMPANY_SECTIONS[company]
+    page   = doc[cfg["page"]]
+    x_text = cfg["x_text"]
+    a_asc  = ARIAL11_ASCENDER if cfg["arial_size"] == 11 else ARIAL12_ASCENDER
+    y_lo, y_hi = cfg["y_range"]
 
-    # Find the main content stream
+    # 1. Remove ALL original bullet cm blocks for this company
     target_xref = None
-    for xref in pg.get_contents():
+    for xref in page.get_contents():
         s = doc.xref_stream(xref).decode('latin-1')
         if '.75 0 0 .75 36' in s:
             target_xref = xref; break
-
     stream = doc.xref_stream(target_xref).decode('latin-1')
 
-    for i, (cm_lo, cm_hi, y_marker, y_text) in enumerate(cfg["entries"]):
-        if i >= len(new_texts): break
-
-        # Remove cm blocks (removes old bullet marker + text)
-        def replacer(m, lo=cm_lo, hi=cm_hi):
-            y = float(m.group(1))
-            return '' if lo < y < hi else m.group(0)
-        stream = stream_pattern.sub(replacer, stream)
-
-        # Re-insert bullet marker ●
-        pg.insert_text(
-            fitz.Point(36.0, y_marker + a_asc),
-            "●",
-            fontname="ArialNew", fontfile=arial,
-            fontsize=a_size, color=(0, 0, 0)
-        )
-
-        # Insert new text (word-wrapped)
-        y_ins = y_text + CALIBRI_ASCENDER
-        for j, line in enumerate(wrap_text(new_texts[i])):
-            pg.insert_text(
-                fitz.Point(x, y_ins + j * CALIBRI_LINE_HT),
-                line, fontname="Calibri", fontfile=calibri,
-                fontsize=12, color=(0, 0, 0)
-            )
-
+    removed = []
+    def replacer(m):
+        y = float(m.group(1))
+        if y_lo < y < y_hi:
+            removed.append(round(y, 2)); return ''
+        return m.group(0)
+    stream = stream_pattern.sub(replacer, stream)
     doc.update_stream(target_xref, stream.encode('latin-1'))
+    print(f"{company}: removed cm blocks at y={removed}")
+
+    # 2. Re-render all bullets dynamically from y_start
+    y = cfg["y_start"]
+    for text in bullets:
+        lines = wrap_text(text, max_width=cfg["wrap_width"])
+        # Bullet marker ●
+        page.insert_text(fitz.Point(36.0, y + a_asc), "●",
+            fontname="ArialNew", fontfile=arial,
+            fontsize=cfg["arial_size"], color=(0, 0, 0))
+        # Text lines
+        for i, line in enumerate(lines):
+            page.insert_text(
+                fitz.Point(x_text, y + CALIBRI_ASCENDER + i * CALIBRI_LINE_HT),
+                line, fontname="Calibri", fontfile=calibri_regular,
+                fontsize=12, color=(0, 0, 0))
+        # Advance y for next bullet: (n_lines + 1) × line_height
+        y += (len(lines) + 1) * CALIBRI_LINE_HT
 
 # Example:
 # doc = fitz.open(dest)
-# update_bullets(doc, "truecar", ["Bullet 1 text.", "Bullet 2 text.", ...])
-# update_bullets(doc, "ekn",     [...])
-# update_bullets(doc, "pfizer",  [...])
-# update_bullets(doc, "tanabe",  [...])
+# render_company_section(doc, "truecar", yaml_data["bullets"]["truecar"])
+# render_company_section(doc, "ekn",     yaml_data["bullets"]["ekn"])
+# render_company_section(doc, "pfizer",  yaml_data["bullets"]["pfizer"])
+# render_company_section(doc, "tanabe",  yaml_data["bullets"]["tanabe"])
 # doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 # doc.close()
 # os.replace('/tmp/resume_copy_out.pdf', dest)
@@ -512,8 +476,8 @@ def update_bullets(doc, company, new_texts):
 When updating Subheader / Summary / Core Comp / Tech Prof AND bullets in the same script:
 
 1. Stream-manipulate page 0 to remove Subheader/Summary/CoreComp/TechProf cm blocks → call `doc.update_stream(...)`.
-2. Call `update_bullets(doc, "truecar", ...)` — it reads the already-modified page 0 stream and further modifies it.
-3. Call `update_bullets(doc, "ekn", ...)` then `update_bullets(doc, "pfizer", ...)` for page 1.
-4. Call `update_bullets(doc, "tanabe", ...)` for page 2.
+2. Call `render_company_section(doc, "truecar", ...)` — reads the already-modified page 0 stream and further modifies it.
+3. Call `render_company_section(doc, "ekn", ...)` then `render_company_section(doc, "pfizer", ...)` for page 1.
+4. Call `render_company_section(doc, "tanabe", ...)` for page 2.
 5. Insert Subheader / Summary / Core Comp / Tech Prof text via `page.insert_text(...)`.
 6. Save once: `doc.save(..., garbage=4, deflate=True)`.
