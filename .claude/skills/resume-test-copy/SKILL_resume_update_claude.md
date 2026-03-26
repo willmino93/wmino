@@ -112,7 +112,11 @@ surgically remove the text `q...Q` blocks from the raw content stream, then inse
 ```python
 import fitz, os, re
 
-font_path_italic  = '/System/Library/Fonts/Supplemental/Arial Italic.ttf'
+calibri_italic  = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrii.ttf'
+calibri_regular = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf'
+calibri_bold    = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrib.ttf'
+font_it   = fitz.Font(fontfile=calibri_italic)
+font_bold = fitz.Font(fontfile=calibri_bold)
 
 doc  = fitz.open(dest)
 xref = doc[0].get_contents()[0]
@@ -138,25 +142,31 @@ new_stream = pattern.sub(replacer, stream)
 doc.update_stream(xref, new_stream.encode('latin-1'))
 print(f"Removed blocks at y: {removed}")
 
-# Insert new text — use insert_textbox for centered sections (Core Comp / Tech Prof)
-# Use insert_text for left-aligned sections (Summary)
+# insert_centered: computes x from content area (x=36 to x=576, width=540), inserts at y.
+# Use for all centered sections (Subheader, Core Comp, Tech Prof).
+# Use insert_text directly for left-aligned sections (Summary: x=36.0, y=144.0).
 page = doc[0]
 
-# Example — Core Competencies (centered, Arial Italic, bullet items per row):
-for row_rect, items in [
-    (fitz.Rect(36.0, 257.0, 576.0, 273.0), '• item1  • item2  • item3'),
-    (fitz.Rect(36.0, 274.0, 576.0, 290.0), '• item4  • item5  • item6'),
-]:
-    page.insert_textbox(
-        row_rect, items,
-        fontname="ArialIt", fontfile=font_path_italic,
-        fontsize=12, color=(0, 0, 0), align=1
-    )
+def insert_centered(text, y, font_obj, fontname, fontfile, fontsize=12):
+    width = font_obj.text_length(text, fontsize=fontsize)
+    x = 36.0 + (540.0 - width) / 2
+    page.insert_text(fitz.Point(x, y), text,
+        fontname=fontname, fontfile=fontfile,
+        fontsize=fontsize, color=(0, 0, 0))
 
-# Example — Summary (left-aligned, Calibri regular, plain text):
-# Extract Calibri from the PDF first, then:
+# Example — Subheader (centered, Calibri-Bold 16pt, y=118.683):
+insert_centered("Your new subheader text here", 118.683, font_bold, "CalibriB", calibri_bold, fontsize=16)
+
+# Example — Core Competencies (centered, Calibri Italic 12pt, y rows: 269.0, 286.0, 303.0):
+insert_centered('• item1  • item2  • item3', 269.0, font_it, "CalibriIt", calibri_italic)
+insert_centered('• item4  • item5  • item6', 286.0, font_it, "CalibriIt", calibri_italic)
+
+# Example — Technical Proficiencies (centered, Calibri Italic 12pt, y rows: 371.0, 388.0):
+insert_centered('• item1  • item2  • item3', 371.0, font_it, "CalibriIt", calibri_italic)
+
+# Example — Summary (left-aligned, Calibri Regular 12pt, x=36.0, y=144.0):
 # page.insert_text(fitz.Point(36.0, 144.0), "Replacement text here",
-#     fontname="Calibri", fontfile="/tmp/Calibri.ttf", fontsize=12, color=(0,0,0))
+#     fontname="Calibri", fontfile=calibri_regular, fontsize=12, color=(0,0,0))
 
 doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 doc.close()
