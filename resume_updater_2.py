@@ -15,7 +15,6 @@ import fitz
 import os
 import re
 import shutil
-import sys
 import yaml
 from datetime import datetime
 
