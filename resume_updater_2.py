@@ -389,7 +389,7 @@ def read_input():
     root.resizable(True, True)
 
     # Instructions label at top
-    tk.Label(root, text=INSTRUCTIONS, justify="left", font=("Courier", 10"),
+    tk.Label(root, text=INSTRUCTIONS, justify="left", font=("Courier", 10),
              anchor="w").pack(fill="x", padx=10, pady=(10, 0))
 
     # Text box in the middle
