@@ -347,13 +347,50 @@ COMPANY_SECTIONS = {
 ### Dynamic y-spacing formula
 
 ```
-y_next_bullet = y_current + (n_lines_in_current_bullet + 1) × CALIBRI_LINE_HT
+y_next_bullet = y_current + (n_lines_in_current_bullet - 1) × CALIBRI_INNER_LINE_HT + CALIBRI_BULLET_ADVANCE
 ```
 
-- Single-line bullet → +2 × 17.3 = **+34.6 pt**
-- Two-line bullet  → +3 × 17.3 = **+51.9 pt** (auto-expands for long text)
+- Single-line bullet → 0 × INNER + ADVANCE = **CALIBRI_BULLET_ADVANCE pt**
+- Two-line bullet → 1 × INNER + ADVANCE
+
+`CALIBRI_INNER_LINE_HT` controls spacing between lines *within* a multi-line bullet.
+`CALIBRI_BULLET_ADVANCE` controls the gap from the start of one bullet to the start of the next (single-line baseline).
+
+**Known spacing issue:** When updated bullet text wraps to a different number of lines than the original (due to Excel Calibri TTF having different metrics than the original embedded subset), spacing with the next bullet appears incorrect. If this occurs, run the diagnostic below to re-measure `CALIBRI_BULLET_ADVANCE` and `CALIBRI_INNER_LINE_HT` from the original PDF.
+
+**Known gap issue:** The space between ● and the first word of updated bullets may appear too small vs. non-updated bullets. If this occurs, increase `x_text` in `COMPANY_SECTIONS` (e.g., try 56.0 or 58.0) and re-measure from the diagnostic below.
 
 **Overflow note:** If bullet content is too long or there are too many bullets, text will overflow into the next section. There is no automatic guard — keep the total content reasonable relative to the original.
+
+### Diagnostic — measure original bullet positions
+
+Run this against the original PDF (not a copy) to get correct `y_start`, `CALIBRI_BULLET_ADVANCE`, `CALIBRI_INNER_LINE_HT`, and `x_text` values:
+
+```python
+import fitz
+
+src = '/Users/willmino/Library/Claude/Resume_Github_Project/Will Mino - Resume.pdf'
+doc = fitz.open(src)
+
+for page_num in range(3):
+    page = doc[page_num]
+    spans = []
+    for b in page.get_text("dict")["blocks"]:
+        if b.get("type") != 0: continue
+        for line in b["lines"]:
+            for span in line["spans"]:
+                spans.append((span["bbox"][1], span["bbox"][0], span["text"][:60]))
+    spans.sort()
+    print(f"\n--- Page {page_num} ---")
+    for y, x, text in spans:
+        print(f"  y={y:.2f}  x={x:.2f}  {text!r}")
+
+doc.close()
+# From output: find ● markers and their corresponding text spans.
+# CALIBRI_BULLET_ADVANCE = y of second bullet − y of first bullet (single-line bullets)
+# CALIBRI_INNER_LINE_HT  = y of second line − y of first line within a wrapped bullet
+# x_text = x of the first word after the ● marker
+```
 
 ### `render_company_section()` function
 
