@@ -8,6 +8,14 @@ user-invocable: true
 
 Before touching any PDF, read the current resume content and draft the proposed changes.
 
+**File reference:**
+
+| File | Purpose |
+|---|---|
+| `resume_original.yaml` | ORIGINAL unedited text from `Will Mino - Resume.pdf`. **Never edit directly.** Used as the template for per-copy YAMLs. |
+| `resume.yaml` | Working file — reflects the desired changes for the NEXT copy. Update this after approval. |
+| `resume_copy_TIMESTAMP.yaml` | Created automatically in Step 1 alongside each PDF copy. Tracks exactly what text is in that specific copy. Update it after applying edits (same values you write to resume.yaml). |
+
 **Step 0a — Read current content from `resume.yaml`**
 
 ```
