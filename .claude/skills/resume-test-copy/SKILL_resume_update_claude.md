@@ -363,17 +363,19 @@ CALIBRI_LINE_HT  = 14.648
 ARIAL11_ASCENDER =  9.958
 ARIAL12_ASCENDER = 10.863
 
-# y_range: full cm y-range to remove all original bullets for this company
-# y_start: y_marker_fitz_top of the FIRST bullet (anchor for dynamic rendering)
+# y_range:       full cm y-range to remove all original bullets for this company
+# y_start:       y_marker_fitz_top of the FIRST bullet (anchor for dynamic rendering)
+# original_y_end: expected y position after last bullet in the ORIGINAL layout;
+#                 used to compute delta for dynamic reflow of sections below
 COMPANY_SECTIONS = {
     "truecar": {"page": 0, "y_range": (453, 740), "y_start": 465.8,
-                "x_text": 45.7,  "arial_size": 11, "wrap_width": 530.0},
+                "x_text": 54.0, "arial_size": 11, "wrap_width": 522.0, "original_y_end": 740},
     "ekn":     {"page": 1, "y_range": ( 86, 300), "y_start":  98.1,
-                "x_text": 46.58, "arial_size": 12, "wrap_width": 529.0},
+                "x_text": 54.0, "arial_size": 12, "wrap_width": 522.0, "original_y_end": 300},
     "pfizer":  {"page": 1, "y_range": (345, 545), "y_start": 357.1,
-                "x_text": 46.58, "arial_size": 12, "wrap_width": 529.0},
+                "x_text": 54.0, "arial_size": 12, "wrap_width": 522.0, "original_y_end": 545},
     "tanabe":  {"page": 2, "y_range": ( 86, 200), "y_start":  98.1,
-                "x_text": 46.58, "arial_size": 12, "wrap_width": 529.0},
+                "x_text": 54.0, "arial_size": 12, "wrap_width": 522.0, "original_y_end": 200},
 }
 ```
 
