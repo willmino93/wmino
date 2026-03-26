@@ -30,23 +30,7 @@ Based on the user's requirements, determine:
 - Which sections need to change (subheader, summary, core_competencies, technical_proficiencies, and/or which company bullets)
 - What the new text should be for each affected section
 
-**Step 0c — Present before/after and ask for approval**
-
-Show the user a clear before/after for every section you plan to change. Example format:
-
-```
-SUBHEADER
-  Before: Senior Data Analyst | eCommerce & Business Intelligence
-  After:  Senior Data Analyst | Data & AI
-
-TRUECAR BULLET 1
-  Before: Designed scalable SQL datasets...
-  After:  Built end-to-end ML pipelines...
-```
-
-**Do NOT proceed to Phase 1 until the user explicitly approves the plan.** The user may request revisions — loop back to Step 0b until approved.
-
-**Step 0d — Update `resume.yaml` with approved text**
+**Step 0c — Update `resume.yaml` with new text**
 
 After approval, write the new values into `resume.yaml` so it stays in sync with the PDF.
 
@@ -84,7 +68,7 @@ print(f"Created: {os.path.basename(dest)}")
 print(f"Created: {os.path.basename(dest_yaml)}")
 # Store dest and dest_yaml — all further steps write to these same paths.
 # After applying edits, update dest_yaml to match the final state of the copy
-# (same values written to resume.yaml in Step 0d).
+# (same values written to resume.yaml in Step 0c).
 ```
 
 ## Step 2 — Extract font info from the copy
@@ -178,16 +162,6 @@ doc.save('/tmp/resume_copy_out.pdf', garbage=4, deflate=True)
 doc.close()
 os.replace('/tmp/resume_copy_out.pdf', dest)
 ```
-
-## Step 4 — Verify
-
-```python
-import pdfplumber
-with pdfplumber.open(dest) as pdf:
-    print(pdf.pages[0].extract_text()[:400])
-```
-
-Confirm "Test" appears after the header and before "Industries:".
 
 ## Section font reference
 
