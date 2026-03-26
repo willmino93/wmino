@@ -355,7 +355,7 @@ BULLETS = {
         ],
     },
     "pfizer": {
-        "page": 1, "x_text": 46.6, "arial_size": 12,
+        "page": 1, "x_text": 46.58, "arial_size": 12,
         "entries": [
             (345, 384,  357.1, 358.9),   # bullet 1
             (384, 413,  386.4, 388.2),   # bullet 2
