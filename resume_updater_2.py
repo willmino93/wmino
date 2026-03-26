@@ -15,6 +15,7 @@ import fitz
 import os
 import re
 import shutil
+import tkinter as tk
 import yaml
 from datetime import datetime
 
