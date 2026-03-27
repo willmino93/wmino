@@ -323,10 +323,14 @@ def _render_header_sections(
                      fontname="CalibriBI", fontfile=fp["calibri_bold_italic"],
                      fontsize=cc_cfg["label_fontsize"], color=(0, 0, 0))
 
-    # Core Competencies rows
+    # Core Competencies rows — vertically centered in each grey bar
     for k, row in enumerate(data.get("core_competencies", [])[:cc_cfg["max_rows"]]):
         row_text = "  ".join(f"• {item}" for item in row)
-        row_y    = cc_label_y + (k + 1) * sp["calibri_inner_line_ht"]
+        if cc_bars and k < len(cc_bars):
+            bar_center = (cc_bars[k].y0 + cc_bars[k].y1) / 2
+            row_y = bar_center + sp["calibri_ascender"] / 2
+        else:
+            row_y = cc_label_y + (k + 1) * sp["calibri_inner_line_ht"]
         _insert_centered(page, row_text, row_y, fonts["italic"],
                          "CalibriIt", fp["calibri_italic"], fontsize=cc_cfg["fontsize"])
         print(f"  Core Comp row {k+1}: {row_text[:60]!r}")
