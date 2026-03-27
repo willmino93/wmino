@@ -266,8 +266,8 @@ def _render_header_sections(
     deltas: dict,
     fonts: dict,
     config: dict,
-    cc_bars: list | None = None,
-    tp_bars: list | None = None,
+    cc_bars=None,
+    tp_bars=None,
 ) -> None:
     """Render subheader, summary, Industries line, Core Competencies, and Tech Proficiencies."""
     sp   = config["spacing"]
