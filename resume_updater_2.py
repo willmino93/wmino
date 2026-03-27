@@ -412,14 +412,16 @@ def generate_pdf(data):
         )
     print(f"  Summary: {len(summary_lines)} line(s)")
 
+    cc_row_y = [cc_label_y + k * CALIBRI_INNER_LINE_HT for k in range(1, 5)]
     for i, row in enumerate(core_competencies[:4]):
         row_text = "  ".join(f"• {item}" for item in row)
-        insert_centered(page0, row_text, CC_ROW_Y[i], font_it, "CalibriIt", CALIBRI_ITALIC)
+        insert_centered(page0, row_text, cc_row_y[i], font_it, "CalibriIt", CALIBRI_ITALIC)
         print(f"  Core Comp row {i+1}: {row_text[:60]!r}")
 
+    tp_row_y = [371.0 + summary_delta, 388.0 + summary_delta]
     for i, row in enumerate(tech_proficiencies[:2]):
         row_text = "  ".join(f"• {item}" for item in row)
-        insert_centered(page0, row_text, TP_ROW_Y[i], font_it, "CalibriIt", CALIBRI_ITALIC)
+        insert_centered(page0, row_text, tp_row_y[i], font_it, "CalibriIt", CALIBRI_ITALIC)
         print(f"  Tech Prof row {i+1}: {row_text[:60]!r}")
 
     tmp = '/tmp/resume_copy_out.pdf'
