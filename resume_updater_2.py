@@ -402,17 +402,14 @@ def generate_pdf(data):
         )
     print(f"  Summary: {len(summary_lines)} line(s)")
 
-    cc_y_values = [269.0 + summary_delta, 286.0 + summary_delta,
-                   303.0 + summary_delta, 320.0 + summary_delta]
     for i, row in enumerate(core_competencies[:4]):
         row_text = "  ".join(f"• {item}" for item in row)
-        insert_centered(page0, row_text, cc_y_values[i], font_it, "CalibriIt", CALIBRI_ITALIC)
+        insert_centered(page0, row_text, CC_ROW_Y[i], font_it, "CalibriIt", CALIBRI_ITALIC)
         print(f"  Core Comp row {i+1}: {row_text[:60]!r}")
 
-    tp_y_values = [371.0 + summary_delta, 388.0 + summary_delta]
     for i, row in enumerate(tech_proficiencies[:2]):
         row_text = "  ".join(f"• {item}" for item in row)
-        insert_centered(page0, row_text, tp_y_values[i], font_it, "CalibriIt", CALIBRI_ITALIC)
+        insert_centered(page0, row_text, TP_ROW_Y[i], font_it, "CalibriIt", CALIBRI_ITALIC)
         print(f"  Tech Prof row {i+1}: {row_text[:60]!r}")
 
     tmp = '/tmp/resume_copy_out.pdf'
