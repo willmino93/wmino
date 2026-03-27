@@ -346,7 +346,11 @@ def generate_pdf(data):
     # Compute summary delta early — needed before redaction (grey bar shifts) and TrueCar render
     summary_lines  = wrap_text(summary, font_cal, max_width=540.0)
     orig_sum_lines = wrap_text(load_yaml(YAML_ORIGINAL).get("summary", ""), font_cal, max_width=540.0)
-    summary_delta  = (len(summary_lines) - len(orig_sum_lines)) * CALIBRI_INNER_LINE_HT
+    summary_delta    = (len(summary_lines) - len(orig_sum_lines)) * CALIBRI_INNER_LINE_HT
+    # Place Industries a fixed gap below the last summary line regardless of industries_orig_y.
+    # cc_delta drives Industries + CC section only; summary_delta drives everything else.
+    industries_new_y = 144.0 + (len(summary_lines) - 1) * CALIBRI_INNER_LINE_HT + SUMMARY_TO_INDUSTRIES_GAP
+    cc_delta         = industries_new_y - industries_orig_y
     if summary_delta != 0:
         COMPANY_SECTIONS["truecar"]["y_start"] += summary_delta
         print(f"  Summary delta={summary_delta:+.2f} — reflowing page 0 content...")
