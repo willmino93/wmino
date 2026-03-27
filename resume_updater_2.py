@@ -39,13 +39,12 @@ ARIAL11_ASCENDER       = 9.958
 ARIAL12_ASCENDER       = 10.863
 
 # ── Fixed anchor positions (page 0) ───────────────────────────────────────────
-# Industries line is in a cm block (stream Y=221.39) that is never removed.
-# CC label and rows are anchored 2 line-heights below it.
-INDUSTRIES_Y  = 218.4
-CC_LABEL_Y    = INDUSTRIES_Y + 2 * CALIBRI_INNER_LINE_HT   # 247.7
-CC_ROW_Y      = [CC_LABEL_Y + k * CALIBRI_INNER_LINE_HT for k in range(1, 5)]
-TP_LABEL_Y    = 353.3
-TP_ROW_Y      = [371.0, 388.0]
+# Industries line lives in a cm block at stream Y=221.39 (get_text y=218.4).
+# It is NOT in any removal range, so it must be shifted explicitly by summary_delta.
+# CC label is always 2 line-heights below the Industries line; both shift together.
+INDUSTRIES_STREAM_Y_RANGE = (210, 240)   # range that captures only the Industries cm block
+INDUSTRIES_Y = 218.4                     # original get_text y of Industries line
+CC_LABEL_BASE_Y = INDUSTRIES_Y + 2 * CALIBRI_INNER_LINE_HT  # 247.7 — 2 lines below Industries
 
 # ── Company section layout ────────────────────────────────────────────────────
 COMPANY_SECTIONS = {
