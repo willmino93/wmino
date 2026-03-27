@@ -32,11 +32,12 @@ CALIBRI_BOLD_ITAL = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts
 ARIAL             = '/System/Library/Fonts/Supplemental/Arial.ttf'
 
 # ── Spacing constants ─────────────────────────────────────────────────────────
-CALIBRI_ASCENDER       = 9.0
-CALIBRI_INNER_LINE_HT  = 14.65
-CALIBRI_BULLET_ADVANCE = 14.65
-ARIAL11_ASCENDER       = 9.958
-ARIAL12_ASCENDER       = 10.863
+CALIBRI_ASCENDER          = 9.0
+CALIBRI_INNER_LINE_HT     = 14.65
+CALIBRI_BULLET_ADVANCE    = 14.65
+ARIAL11_ASCENDER          = 9.958
+ARIAL12_ASCENDER          = 10.863
+SUMMARY_TO_INDUSTRIES_GAP = CALIBRI_INNER_LINE_HT + 4.5  # baseline gap: last summary line → Industries
 
 # ── Fixed anchor positions (page 0) ───────────────────────────────────────────
 # Industries line is pre-removed before apply_redactions to avoid duplication,
