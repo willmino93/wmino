@@ -320,6 +320,11 @@ def generate_pdf(data):
     removed_sum = remove_cm_blocks(doc, 0, y_min=118, y_max=121)
     removed_cc  = remove_cm_blocks(doc, 0, y_min=250, y_max=320)
     removed_tp  = remove_cm_blocks(doc, 0, y_min=350, y_max=380)
+    # Redact the CC and TP bands to erase any non-cm-block encoded original text
+    _p0 = doc[0]
+    _p0.add_redact_annot(fitz.Rect(0, 248, _p0.rect.width, 332))
+    _p0.add_redact_annot(fitz.Rect(0, 348, _p0.rect.width, 396))
+    _p0.apply_redactions()
     print(f"  Subheader cm blocks removed: {removed_sub}")
     print(f"  Summary cm blocks removed:   {removed_sum}")
     print(f"  Core Comp cm blocks removed: {removed_cc}")
