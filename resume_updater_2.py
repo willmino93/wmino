@@ -369,14 +369,6 @@ def generate_pdf(data):
     insert_centered(page0, subheader, 118.683, font_bold, "CalibriB", CALIBRI_BOLD, fontsize=16)
     print(f"  Subheader: {subheader!r}")
 
-    summary_lines  = wrap_text(summary, font_cal, max_width=540.0)
-    orig_summary   = load_yaml(YAML_ORIGINAL).get("summary", "")
-    orig_sum_lines = wrap_text(orig_summary, font_cal, max_width=540.0)
-    summary_delta  = (len(summary_lines) - len(orig_sum_lines)) * CALIBRI_INNER_LINE_HT
-    if summary_delta != 0:
-        COMPANY_SECTIONS["truecar"]["y_start"] += summary_delta
-        print(f"  Summary delta={summary_delta:+.2f} — reflowing page 0 content...")
-
     for i, line in enumerate(summary_lines):
         page0.insert_text(
             fitz.Point(36.0, 144.0 + i * CALIBRI_INNER_LINE_HT), line,
