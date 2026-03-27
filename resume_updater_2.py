@@ -361,8 +361,9 @@ def generate_pdf(data):
     grey_bars = [{"rect": p["rect"], "fill": p["fill"]}
                  for p in _p0.get_drawings()
                  if p.get("fill") and 240 < p["rect"].y0 < 400]
-    _p0.add_redact_annot(fitz.Rect(0, 248, _p0.rect.width, 332))
-    _p0.add_redact_annot(fitz.Rect(0, 348, _p0.rect.width, 396))
+    _p0.add_redact_annot(fitz.Rect(0, 212, _p0.rect.width, 237))   # Industries line + spacer
+    _p0.add_redact_annot(fitz.Rect(0, 248, _p0.rect.width, 332))   # Core Competencies
+    _p0.add_redact_annot(fitz.Rect(0, 348, _p0.rect.width, 396))   # Technical Proficiencies
     _p0.apply_redactions()
     for bar in grey_bars:
         r = bar["rect"]
