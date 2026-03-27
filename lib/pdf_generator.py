@@ -500,12 +500,21 @@ def generate_pdf(config: dict) -> str:
         y_lo, y_hi = reflow_cfg["summary_page0_shift_range"]
         _shift_blocks_in_y_range(doc, 0, y_lo, y_hi, summary_delta, config)
 
-    # Restore grey bars at shifted positions
+    # Restore grey bars at shifted positions; collect shifted rects for centering text
+    cc_bars: list = []
+    tp_bars: list = []
     cc_threshold = lay["core_competencies"]["grey_bar_y_threshold"]
     for bar in grey_bars:
         r = bar["rect"]
         d = cc_delta if r.y0 < cc_threshold else summary_delta
-        p0.draw_rect(fitz.Rect(r.x0, r.y0 + d, r.x1, r.y1 + d), color=None, fill=bar["fill"])
+        shifted = fitz.Rect(r.x0, r.y0 + d, r.x1, r.y1 + d)
+        p0.draw_rect(shifted, color=None, fill=bar["fill"])
+        if r.y0 < cc_threshold:
+            cc_bars.append(shifted)
+        else:
+            tp_bars.append(shifted)
+    cc_bars.sort(key=lambda r: r.y0)
+    tp_bars.sort(key=lambda r: r.y0)
 
     # ── 9. Render company bullet sections ─────────────────────────────────────
     print("\nRendering company bullet sections...")
