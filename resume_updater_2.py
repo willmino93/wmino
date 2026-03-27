@@ -313,6 +313,18 @@ def generate_pdf(data):
     print(f"\nCreated: {os.path.basename(dest)}")
     print(f"Created: {os.path.basename(dest_yaml)}")
 
+    # Read Industries line text from source PDF before modifying the copy
+    _src = fitz.open(SRC_PDF)
+    industries_text = ""
+    for _b in _src[0].get_text('dict')['blocks']:
+        if _b['type'] == 0:
+            for _ln in _b['lines']:
+                for _sp in _ln['spans']:
+                    if abs(_sp['origin'][1] - INDUSTRIES_Y) < 3:
+                        industries_text += _sp['text']
+    _src.close()
+    industries_text = industries_text.strip()
+
     doc          = fitz.open(dest)
     font_it      = fitz.Font(fontfile=CALIBRI_ITALIC)
     font_bold    = fitz.Font(fontfile=CALIBRI_BOLD)
