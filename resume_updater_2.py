@@ -38,6 +38,15 @@ CALIBRI_BULLET_ADVANCE = 14.65
 ARIAL11_ASCENDER       = 9.958
 ARIAL12_ASCENDER       = 10.863
 
+# ── Fixed anchor positions (page 0) ───────────────────────────────────────────
+# Industries line is in a cm block (stream Y=221.39) that is never removed.
+# CC label and rows are anchored 2 line-heights below it.
+INDUSTRIES_Y  = 218.4
+CC_LABEL_Y    = INDUSTRIES_Y + 2 * CALIBRI_INNER_LINE_HT   # 247.7
+CC_ROW_Y      = [CC_LABEL_Y + k * CALIBRI_INNER_LINE_HT for k in range(1, 5)]
+TP_LABEL_Y    = 353.3
+TP_ROW_Y      = [371.0, 388.0]
+
 # ── Company section layout ────────────────────────────────────────────────────
 COMPANY_SECTIONS = {
     "truecar": {
