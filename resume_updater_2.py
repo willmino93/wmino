@@ -312,17 +312,23 @@ def generate_pdf(data):
     print(f"\nCreated: {os.path.basename(dest)}")
     print(f"Created: {os.path.basename(dest_yaml)}")
 
-    # Read Industries line text from source PDF before modifying the copy
+    # Read Industries line text and y-position dynamically from the source PDF.
+    # This makes the script robust to changes in the original PDF layout.
     _src = fitz.open(SRC_PDF)
     industries_text = ""
+    industries_orig_y = None
     for _b in _src[0].get_text('dict')['blocks']:
         if _b['type'] == 0:
             for _ln in _b['lines']:
                 for _sp in _ln['spans']:
-                    if abs(_sp['origin'][1] - INDUSTRIES_Y) < 3:
+                    if 'Industries' in _sp['text'] and industries_orig_y is None:
+                        industries_orig_y = _sp['origin'][1]
+                    if industries_orig_y is not None and abs(_sp['origin'][1] - industries_orig_y) < 3:
                         industries_text += _sp['text']
     _src.close()
     industries_text = industries_text.strip()
+    if industries_orig_y is None:
+        raise RuntimeError("Could not find Industries line in source PDF")
 
     doc          = fitz.open(dest)
     font_it      = fitz.Font(fontfile=CALIBRI_ITALIC)
