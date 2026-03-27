@@ -41,7 +41,7 @@ ARIAL12_ASCENDER       = 10.863
 # ── Company section layout ────────────────────────────────────────────────────
 COMPANY_SECTIONS = {
     "truecar": {
-        "page": 0, "y_range": (453, 740), "y_start": 465.8,
+        "page": 0, "y_range": (453, 740), "y_start": 480.45,
         "x_text": 54.0, "arial_size": 11, "wrap_width": 522.0, "original_y_end": 740,
     },
     "ekn": {
