@@ -353,18 +353,15 @@ def generate_pdf(data):
     _p0.apply_redactions()
     for bar in grey_bars:
         r = bar["rect"]
-        _p0.draw_rect(fitz.Rect(r.x0, r.y0 + summary_delta, r.x1, r.y1 + summary_delta),
-                      color=None, fill=bar["fill"])
+        _p0.draw_rect(fitz.Rect(r.x0, r.y0, r.x1, r.y1), color=None, fill=bar["fill"])
 
-    # Re-insert section labels removed by redaction, shifted by summary_delta
-    cc_label_y  = 251.7 + summary_delta
-    tp_label_y  = 353.3 + summary_delta
-    w_core  = font_bold_it.text_length("Core ",        fontsize=14)
-    w_comp  = font_bold.text_length("Competencies", fontsize=14)
-    _p0.insert_text(fitz.Point(36.0,           cc_label_y), "Core ",        fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=14, color=(0, 0, 0))
-    _p0.insert_text(fitz.Point(36.0 + w_core,  cc_label_y), "Competencies", fontname="CalibriB",  fontfile=CALIBRI_BOLD,     fontsize=14, color=(0, 0, 0))
-    _p0.insert_text(fitz.Point(36.0 + w_core + w_comp, cc_label_y), ":",    fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=14, color=(0, 0, 0))
-    _p0.insert_text(fitz.Point(36.0,           tp_label_y), "Technical Proficiencies:", fontname="CalibriB", fontfile=CALIBRI_BOLD, fontsize=14, color=(0, 0, 0))
+    # Re-insert section labels at fixed positions (anchored to Industries line)
+    w_core = font_bold_it.text_length("Core ",        fontsize=14)
+    w_comp = font_bold.text_length("Competencies", fontsize=14)
+    _p0.insert_text(fitz.Point(36.0,                   CC_LABEL_Y), "Core ",        fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=14, color=(0, 0, 0))
+    _p0.insert_text(fitz.Point(36.0 + w_core,          CC_LABEL_Y), "Competencies", fontname="CalibriB",  fontfile=CALIBRI_BOLD,     fontsize=14, color=(0, 0, 0))
+    _p0.insert_text(fitz.Point(36.0 + w_core + w_comp, CC_LABEL_Y), ":",            fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=14, color=(0, 0, 0))
+    _p0.insert_text(fitz.Point(36.0,                   TP_LABEL_Y), "Technical Proficiencies:", fontname="CalibriB", fontfile=CALIBRI_BOLD, fontsize=14, color=(0, 0, 0))
     print("  Re-inserted: Core Competencies label")
     print("  Re-inserted: Technical Proficiencies label")
 
