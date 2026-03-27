@@ -169,6 +169,10 @@ def apply_updates(data, updates):
                 # Flatten all items then split evenly across 2 rows
                 all_items = [item for row in updates[key] for item in row]
                 updates[key] = split_even_rows(all_items, 2)
+            elif key == 'core_competencies':
+                # Flatten all items then enforce exactly 3 per row
+                all_items = [item for row in updates[key] for item in row]
+                updates[key] = [all_items[i:i+3] for i in range(0, len(all_items), 3)]
             data[key] = updates[key]
             print(f"  Updated: {key}")
 

@@ -1,91 +1,102 @@
-subheader: Senior Data Analyst | Data Analytics Expert
-summary: Results-driven Senior Data Analyst with 9 years of experience turning complex
-  eCommerce, product, and business data into actionable insights through end-to-end
-  analytics pipelines. Expertise in SQL, Python, Tableau, Power BI, Excel, and modern
-  BI & AI tools (Cursor, Claude Opus). Skilled in funnel analysis, process optimization,
-  and advanced data analytics. Proven ability to translate complex datasets into business
-  decisions and drive measurable outcomes across cross-functional teams.
+subheader: Senior Data Analyst | Analytics Lead | AI & Data Strategy
+summary: Results-driven Senior Data Analyst with 9+ years of experience leading large-scale,
+  cross-functional analytics initiatives and building scalable data solutions. Expertise
+  in SQL, Python, R, and cloud platforms (AWS, Snowflake), with strong experience
+  in data engineering, AI/ML applications, and advanced analytics. Skilled in data
+  modeling, forecasting, automation, and enterprise reporting. Proven ability to architect
+  data pipelines, translate complex datasets into strategic insights, and drive measurable
+  business outcomes while mentoring analysts and influencing executive decision-making.
 core_competencies:
-- - Funnel & Conversion Analysis
-  - Marketing & Revenue Analytics
-  - Data Modeling
-- - A/B Testing
-  - Data Analysis & Visualization
-  - Data Cleaning & Transformation
-- - Dashboards and BI Tools
-  - Big Data & Cloud Tools
-  - Project Management
-- - Root Cause Analysis
-  - Stakeholder Management
-  - Collaboration & Communication
+- - Enterprise Analytics & Data Strategy
+  - AI & Machine Learning Applications
+  - Data Modeling & Architecture
+  - Predictive Analytics & Forecasting
+  - Data Engineering & Pipelines
+  - KPI Development & Performance Tracking
+  - Data Governance & Compliance
+  - Advanced Statistical Analysis
+  - Dashboarding & BI Solutions
+  - Process Automation & Optimization
+  - Cross-Functional Leadership
+  - Stakeholder Communication & Executive Reporting
 technical_proficiencies:
 - - AWS
+  - Snowflake
   - Amazon Redshift
-  - Data Pipelines
   - SQL
   - Python
-  - Excel
+  - R
+  - Spark
+  - Hadoop
+  - Data Pipelines
 - - Tableau
   - Power BI
-  - Salesforce
+  - Excel
   - SAP
-  - Google Analytics
-  - Claude Opus
+  - Kinaxis
+  - Machine Learning Frameworks
+  - AI Tools (Cursor
+  - Claude Opus)
 bullets:
   truecar:
-  - Designed scalable SQL datasets and reporting tables in Amazon Redshift to support
-    automated dashboards and end-to-end business performance tracking.
-  - Partnered with Product, Sales, and Business stakeholders to evaluate the impact
-    of pricing, incentives, and marketplace changes using statistical analysis and
-    experimentation frameworks.
-  - Translated complex data into actionable business insights for stakeholders, supporting
-    data-informed decision-making.
-  - Leveraged AI tools like Cursor and Claude Opus to optimize SQL queries and perform
-    ad hoc data pulls.
-  - Developed dashboards monitoring program performance, revenue outcomes, and user
-    behavior for operational transparency.
-  - Streamlined reporting and data cleaning processes, reducing manual effort and
-    accelerating insight delivery.
-  - Owned reporting for OEM incentive programs generating $7M annually, ensuring accurate
-    tracking, reconciliation, and downstream reporting integrity.
-  - Delivered insights to regain a key client, recovering $500K in annual recurring
-    revenue through targeted performance analysis.
-  - Created Python scripts to accelerate data entry and export workflows, enhancing
-    team productivity.
+  - Led the design and deployment of scalable analytics solutions, building robust
+    SQL datasets and data pipelines in Amazon Redshift to support enterprise-wide
+    reporting and decision-making.
+  - Partnered with Product, Sales, and Business stakeholders to evaluate pricing,
+    incentives, and marketplace changes using statistical modeling and experimentation
+    frameworks.
+  - Translated complex data into actionable insights to influence strategic decisions
+    and improve business performance.
+  - Leveraged AI tools like Cursor and Claude Opus to optimize SQL queries, automate
+    workflows, and accelerate ad hoc analysis.
+  - Developed dashboards tracking KPIs, revenue performance, and user behavior to
+    drive operational transparency.
+  - Streamlined reporting and data transformation processes, reducing manual effort
+    and improving efficiency.
+  - Owned reporting for OEM incentive programs generating $7M annually, ensuring data
+    integrity, governance, and accurate reconciliation.
+  - Delivered insights that recovered $500K in annual recurring revenue through targeted
+    performance analysis.
+  - Mentored junior analysts on SQL, analytics best practices, and dashboard development.
+  - Created Python-based automation tools to improve data processing and team productivity.
   ekn:
-  - Analyzed operational workflows from data ingestion through final delivery, identifying
-    inefficiencies, data gaps, and process breakdowns.
-  - Developed dashboards to monitor field crew activities and job changes through
-    app messaging and equipment data, streamlining field operations and driving efficiency
-    and cost savings.
-  - Built automated tracking and analytics tools using SQL, Excel VBA, Python, and
-    SAP to improve operational visibility and enable data-driven decision-making.
-  - Supported ad hoc financial and business analyses, enabling strategic decision-making
-    across client-facing programs.
-  - Conducted root cause investigations for data discrepancies, ensuring confidence
-    in downstream financial and operational reporting.
-  - Collaborated with cross-functional teams to define KPIs, reporting requirements,
-    and metrics for performance tracking.
-  - Delivered insights leading to $120K in cost reductions and improved operational
-    efficiency.
+  - Led analysis of operational workflows from data ingestion through delivery, identifying
+    inefficiencies and implementing scalable data solutions.
+  - Developed dashboards to monitor field operations, equipment usage, and job changes,
+    improving efficiency and cost visibility.
+  - Built automated data pipelines and analytics tools using SQL, Python, Excel VBA,
+    and SAP to enhance reporting and decision-making.
+  - Performed advanced analysis to identify cost-saving opportunities, contributing
+    to $120K in operational savings.
+  - Established KPIs and reporting frameworks in collaboration with cross-functional
+    stakeholders.
+  - Conducted root cause analyses for data discrepancies, ensuring accuracy and reliability
+    of reporting systems.
+  - Supported strategic initiatives through ad hoc analysis, forecasting, and business
+    modeling.
   pfizer:
-  - Contributed to cancer research through advanced data analysis, training junior
-    scientists, and comprehensive data reporting.
-  - Designed and implemented streamlined processes for data generation, transformation,
-    and visualization, improving accuracy and efficiency.
-  - Led and coordinated early-stage research projects, performing laboratory work
-    and presenting findings to key stakeholders.
-  - Utilized project management methodologies to accelerate milestone completion and
-    improve research outcomes.
-  - Applied automation and algorithmic approaches to optimize high-throughput screening
-    assays, increasing efficiency by 50%.
-  - Managed and allocated research project budgets ranging from $30,000 to $50,000,
-    ensuring strategic investment in cutting-edge technologies.
+  - Applied advanced data analysis and statistical techniques to support oncology
+    research and drive data-informed decision-making.
+  - Designed and implemented efficient data workflows for data collection, transformation,
+    and visualization, improving accuracy and productivity.
+  - Developed automated and algorithmic approaches for high-throughput screening,
+    increasing efficiency by 50%.
+  - Led early-stage research initiatives, coordinating cross-functional teams and
+    presenting findings to technical and non-technical stakeholders.
+  - Mentored junior scientists on data analysis, reporting, and best practices.
+  - Managed research budgets between $30,000 and $50,000, ensuring optimal allocation
+    of resources.
+  - Implemented structured data management and governance practices to improve data
+    quality and reproducibility.
   tanabe:
-  - Conducted research on cancer therapies, successfully integrating research projects
-    into the clinical portfolio.
-  - Facilitated the advancement of 25% of early-stage cancer research projects.
-  - Delivered company-wide presentations to communicate research progress and key
-    findings.
-  - Managed project expenditures, maintaining an annual spending limit of $50,000
-    while ensuring adherence to budget constraints.
+  - Conducted data-driven research on cancer therapies, supporting the advancement
+    of early-stage drug development programs.
+  - Applied statistical analysis and data interpretation to evaluate experimental
+    results and guide research strategy.
+  - Facilitated the progression of 25% of early-stage research projects into the clinical
+    pipeline.
+  - Delivered presentations to technical and business stakeholders, translating complex
+    data into clear insights.
+  - Managed project budgets up to $50,000 while ensuring adherence to financial constraints.
+  - Collaborated across teams to standardize data collection, reporting, and analysis
+    processes.
