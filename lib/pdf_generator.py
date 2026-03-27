@@ -345,11 +345,15 @@ def _render_header_sections(
         fontsize=tp_cfg["label_fontsize"], color=(0, 0, 0),
     )
 
-    # Technical Proficiencies rows
+    # Technical Proficiencies rows — vertically centered in each grey bar
     tp_row_y_base = tp_cfg["row_y_base"]
     for k, row in enumerate(data.get("technical_proficiencies", [])[:tp_cfg["max_rows"]]):
         row_text = "  ".join(f"• {item}" for item in row)
-        row_y    = tp_row_y_base[k] + summary_delta
+        if tp_bars and k < len(tp_bars):
+            bar_center = (tp_bars[k].y0 + tp_bars[k].y1) / 2
+            row_y = bar_center + sp["calibri_ascender"] / 2
+        else:
+            row_y = tp_row_y_base[k] + summary_delta
         _insert_centered(page, row_text, row_y, fonts["italic"],
                          "CalibriIt", fp["calibri_italic"], fontsize=tp_cfg["fontsize"])
         print(f"  Tech Prof row {k+1}: {row_text[:60]!r}")
