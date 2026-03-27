@@ -305,10 +305,11 @@ def generate_pdf(data):
     print(f"\nCreated: {os.path.basename(dest)}")
     print(f"Created: {os.path.basename(dest_yaml)}")
 
-    doc       = fitz.open(dest)
-    font_it   = fitz.Font(fontfile=CALIBRI_ITALIC)
-    font_bold = fitz.Font(fontfile=CALIBRI_BOLD)
-    font_cal  = fitz.Font(fontfile=CALIBRI_REGULAR)
+    doc          = fitz.open(dest)
+    font_it      = fitz.Font(fontfile=CALIBRI_ITALIC)
+    font_bold    = fitz.Font(fontfile=CALIBRI_BOLD)
+    font_bold_it = fitz.Font(fontfile=CALIBRI_BOLD_ITAL)
+    font_cal     = fitz.Font(fontfile=CALIBRI_REGULAR)
 
     subheader          = data.get("subheader", "")
     summary            = data.get("summary", "")
