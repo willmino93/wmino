@@ -315,6 +315,14 @@ def generate_pdf(data):
     tech_proficiencies = data.get("technical_proficiencies", [])
     bullets            = data.get("bullets", {})
 
+    # Compute summary delta early — needed before redaction (grey bar shifts) and TrueCar render
+    summary_lines  = wrap_text(summary, font_cal, max_width=540.0)
+    orig_sum_lines = wrap_text(load_yaml(YAML_ORIGINAL).get("summary", ""), font_cal, max_width=540.0)
+    summary_delta  = (len(summary_lines) - len(orig_sum_lines)) * CALIBRI_INNER_LINE_HT
+    if summary_delta != 0:
+        COMPANY_SECTIONS["truecar"]["y_start"] += summary_delta
+        print(f"  Summary delta={summary_delta:+.2f} — reflowing page 0 content...")
+
     print("\nRemoving header section cm blocks (page 0)...")
     removed_sub = remove_cm_blocks(doc, 0, y_min=98,  y_max=101)
     removed_sum = remove_cm_blocks(doc, 0, y_min=118, y_max=121)
