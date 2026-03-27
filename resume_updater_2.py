@@ -443,7 +443,7 @@ def generate_pdf(data):
         insert_centered(page0, row_text, cc_row_y[i], font_it, "CalibriIt", CALIBRI_ITALIC)
         print(f"  Core Comp row {i+1}: {row_text[:60]!r}")
 
-    tp_row_y = [371.0 + summary_delta, 388.0 + summary_delta]
+    tp_row_y = [371.0 + adjusted_delta, 388.0 + adjusted_delta]
     for i, row in enumerate(tech_proficiencies[:2]):
         row_text = "  ".join(f"• {item}" for item in row)
         insert_centered(page0, row_text, tp_row_y[i], font_it, "CalibriIt", CALIBRI_ITALIC)
