@@ -565,6 +565,7 @@ def generate_pdf(config: dict) -> str:
         doc, data, summary_lines,
         industries_text, industries_new_y, cc_delta,
         deltas, fonts, config,
+        cc_bars=cc_bars, tp_bars=tp_bars,
     )
 
     # ── 11. Save ──────────────────────────────────────────────────────────────
