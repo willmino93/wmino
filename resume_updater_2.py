@@ -342,6 +342,14 @@ def generate_pdf(data):
     # content stream on page 0, and any cm blocks still present get copied into it, causing
     # a duplicate section to appear. Removing them here ensures neither stream contains them.
     remove_cm_blocks(doc, 0, y_min=453, y_max=740)
+
+    # Shift the Industries line cm block so it moves with summary length changes.
+    # CC label is anchored 2 line-heights below Industries, so both shift together.
+    if summary_delta != 0:
+        lo, hi = INDUSTRIES_STREAM_Y_RANGE
+        shift_blocks_in_y_range(doc, 0, y_lo=lo, y_hi=hi, delta=summary_delta)
+        print(f"  Industries line shifted by {summary_delta:+.2f}")
+
     # Capture grey bar graphics before redaction, then restore them at shifted positions
     _p0 = doc[0]
     grey_bars = [{"rect": p["rect"], "fill": p["fill"]}
@@ -352,15 +360,18 @@ def generate_pdf(data):
     _p0.apply_redactions()
     for bar in grey_bars:
         r = bar["rect"]
-        _p0.draw_rect(fitz.Rect(r.x0, r.y0, r.x1, r.y1), color=None, fill=bar["fill"])
+        _p0.draw_rect(fitz.Rect(r.x0, r.y0 + summary_delta, r.x1, r.y1 + summary_delta),
+                      color=None, fill=bar["fill"])
 
-    # Re-insert section labels at fixed positions (anchored to Industries line)
+    # Re-insert section labels, shifted with summary so spacing is preserved
+    cc_label_y = CC_LABEL_BASE_Y + summary_delta
+    tp_label_y = 353.3 + summary_delta
     w_core = font_bold_it.text_length("Core ",        fontsize=14)
     w_comp = font_bold.text_length("Competencies", fontsize=14)
-    _p0.insert_text(fitz.Point(36.0,                   CC_LABEL_Y), "Core ",        fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=14, color=(0, 0, 0))
-    _p0.insert_text(fitz.Point(36.0 + w_core,          CC_LABEL_Y), "Competencies", fontname="CalibriB",  fontfile=CALIBRI_BOLD,     fontsize=14, color=(0, 0, 0))
-    _p0.insert_text(fitz.Point(36.0 + w_core + w_comp, CC_LABEL_Y), ":",            fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=14, color=(0, 0, 0))
-    _p0.insert_text(fitz.Point(36.0,                   TP_LABEL_Y), "Technical Proficiencies:", fontname="CalibriB", fontfile=CALIBRI_BOLD, fontsize=14, color=(0, 0, 0))
+    _p0.insert_text(fitz.Point(36.0,                   cc_label_y), "Core ",        fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=14, color=(0, 0, 0))
+    _p0.insert_text(fitz.Point(36.0 + w_core,          cc_label_y), "Competencies", fontname="CalibriB",  fontfile=CALIBRI_BOLD,     fontsize=14, color=(0, 0, 0))
+    _p0.insert_text(fitz.Point(36.0 + w_core + w_comp, cc_label_y), ":",            fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=14, color=(0, 0, 0))
+    _p0.insert_text(fitz.Point(36.0,                   tp_label_y), "Technical Proficiencies:", fontname="CalibriB", fontfile=CALIBRI_BOLD, fontsize=14, color=(0, 0, 0))
     print("  Re-inserted: Core Competencies label")
     print("  Re-inserted: Technical Proficiencies label")
 
