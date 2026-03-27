@@ -25,10 +25,11 @@ SRC_PDF       = os.path.join(BASE_DIR, 'Will Mino - Resume.pdf')
 YAML_ORIGINAL = os.path.join(BASE_DIR, 'resume_original.yaml')
 YAML_WORKING  = os.path.join(BASE_DIR, 'resume.yaml')
 
-CALIBRI_REGULAR = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf'
-CALIBRI_ITALIC  = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrii.ttf'
-CALIBRI_BOLD    = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrib.ttf'
-ARIAL           = '/System/Library/Fonts/Supplemental/Arial.ttf'
+CALIBRI_REGULAR   = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf'
+CALIBRI_ITALIC    = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrii.ttf'
+CALIBRI_BOLD      = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrib.ttf'
+CALIBRI_BOLD_ITAL = '/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibriz.ttf'
+ARIAL             = '/System/Library/Fonts/Supplemental/Arial.ttf'
 
 # ── Spacing constants ─────────────────────────────────────────────────────────
 CALIBRI_ASCENDER       = 9.0
