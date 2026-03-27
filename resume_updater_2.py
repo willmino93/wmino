@@ -377,16 +377,16 @@ def generate_pdf(data):
     _p0.add_redact_annot(fitz.Rect(0, 248, _p0.rect.width, 332))   # Core Competencies
     _p0.add_redact_annot(fitz.Rect(0, 348, _p0.rect.width, 396))   # Technical Proficiencies
     _p0.apply_redactions()
-    if summary_delta != 0:
-        shift_blocks_in_y_range(doc, 0, y_lo=396, y_hi=453, delta=summary_delta)
+    if adjusted_delta != 0:
+        shift_blocks_in_y_range(doc, 0, y_lo=396, y_hi=453, delta=adjusted_delta)
     for bar in grey_bars:
         r = bar["rect"]
-        _p0.draw_rect(fitz.Rect(r.x0, r.y0 + summary_delta, r.x1, r.y1 + summary_delta),
+        _p0.draw_rect(fitz.Rect(r.x0, r.y0 + adjusted_delta, r.x1, r.y1 + adjusted_delta),
                       color=None, fill=bar["fill"])
 
     # Re-insert section labels, shifted with summary so spacing is preserved
-    cc_label_y = industries_orig_y + CC_LINES_BELOW_INDUSTRIES * CALIBRI_INNER_LINE_HT + summary_delta
-    tp_label_y = 353.3 + summary_delta
+    cc_label_y = industries_new_y + CC_LINES_BELOW_INDUSTRIES * CALIBRI_INNER_LINE_HT
+    tp_label_y = 353.3 + adjusted_delta
     w_core = font_bold_it.text_length("Core ",        fontsize=14)
     w_comp = font_bold.text_length("Competencies", fontsize=14)
     
