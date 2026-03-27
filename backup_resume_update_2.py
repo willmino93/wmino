@@ -315,35 +315,11 @@ def generate_pdf(data):
     tech_proficiencies = data.get("technical_proficiencies", [])
     bullets            = data.get("bullets", {})
 
-    # Compute summary delta early — needed before redaction (grey bar shifts) and TrueCar render
-    summary_lines  = wrap_text(summary, font_cal, max_width=540.0)
-    orig_sum_lines = wrap_text(load_yaml(YAML_ORIGINAL).get("summary", ""), font_cal, max_width=540.0)
-    summary_delta  = (len(summary_lines) - len(orig_sum_lines)) * CALIBRI_INNER_LINE_HT
-    if summary_delta != 0:
-        COMPANY_SECTIONS["truecar"]["y_start"] += summary_delta
-        print(f"  Summary delta={summary_delta:+.2f} — reflowing page 0 content...")
-
     print("\nRemoving header section cm blocks (page 0)...")
     removed_sub = remove_cm_blocks(doc, 0, y_min=98,  y_max=101)
     removed_sum = remove_cm_blocks(doc, 0, y_min=118, y_max=121)
     removed_cc  = remove_cm_blocks(doc, 0, y_min=250, y_max=320)
     removed_tp  = remove_cm_blocks(doc, 0, y_min=350, y_max=380)
-    # Pre-remove TrueCar cm blocks before apply_redactions: apply_redactions() creates a new
-    # content stream on page 0, and any cm blocks still present get copied into it, causing
-    # a duplicate section to appear. Removing them here ensures neither stream contains them.
-    remove_cm_blocks(doc, 0, y_min=453, y_max=740)
-    # Capture grey bar graphics before redaction, then restore them at shifted positions
-    _p0 = doc[0]
-    grey_bars = [{"rect": p["rect"], "fill": p["fill"]}
-                 for p in _p0.get_drawings()
-                 if p.get("fill") and 240 < p["rect"].y0 < 400]
-    _p0.add_redact_annot(fitz.Rect(0, 248, _p0.rect.width, 332))
-    _p0.add_redact_annot(fitz.Rect(0, 348, _p0.rect.width, 396))
-    _p0.apply_redactions()
-    for bar in grey_bars:
-        r = bar["rect"]
-        _p0.draw_rect(fitz.Rect(r.x0, r.y0 + summary_delta, r.x1, r.y1 + summary_delta),
-                      color=None, fill=bar["fill"])
     print(f"  Subheader cm blocks removed: {removed_sub}")
     print(f"  Summary cm blocks removed:   {removed_sum}")
     print(f"  Core Comp cm blocks removed: {removed_cc}")
@@ -372,6 +348,14 @@ def generate_pdf(data):
 
     insert_centered(page0, subheader, 118.683, font_bold, "CalibriB", CALIBRI_BOLD, fontsize=16)
     print(f"  Subheader: {subheader!r}")
+
+    summary_lines  = wrap_text(summary, font_cal, max_width=540.0)
+    orig_summary   = load_yaml(YAML_ORIGINAL).get("summary", "")
+    orig_sum_lines = wrap_text(orig_summary, font_cal, max_width=540.0)
+    summary_delta  = (len(summary_lines) - len(orig_sum_lines)) * CALIBRI_INNER_LINE_HT
+    if summary_delta != 0:
+        COMPANY_SECTIONS["truecar"]["y_start"] += summary_delta
+        print(f"  Summary delta={summary_delta:+.2f} — reflowing page 0 content...")
 
     for i, line in enumerate(summary_lines):
         page0.insert_text(
