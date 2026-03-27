@@ -346,14 +346,9 @@ def generate_pdf(data):
     summary_lines  = wrap_text(summary, font_cal, max_width=540.0)
     orig_sum_lines = wrap_text(load_yaml(YAML_ORIGINAL).get("summary", ""), font_cal, max_width=540.0)
     summary_delta  = (len(summary_lines) - len(orig_sum_lines)) * CALIBRI_INNER_LINE_HT
-    # industries_orig_y sits at the same baseline as the last summary line in the source PDF,
-    # so using it directly causes a permanent overlap.  Always anchor Industries exactly
-    # one line-height below the last line of the NEW summary instead.
-    industries_new_y = 144.0 + len(summary_lines) * CALIBRI_INNER_LINE_HT
-    adjusted_delta   = industries_new_y - industries_orig_y
-    if adjusted_delta != 0:
-        COMPANY_SECTIONS["truecar"]["y_start"] += adjusted_delta
-        print(f"  Summary delta={summary_delta:+.2f}, adjusted_delta={adjusted_delta:+.2f} — reflowing page 0 content...")
+    if summary_delta != 0:
+        COMPANY_SECTIONS["truecar"]["y_start"] += summary_delta
+        print(f"  Summary delta={summary_delta:+.2f} — reflowing page 0 content...")
 
     print("\nRemoving header section cm blocks (page 0)...")
     removed_sub = remove_cm_blocks(doc, 0, y_min=98,  y_max=101)
