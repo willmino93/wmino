@@ -343,13 +343,6 @@ def generate_pdf(data):
     # a duplicate section to appear. Removing them here ensures neither stream contains them.
     remove_cm_blocks(doc, 0, y_min=453, y_max=740)
 
-    # Shift the Industries line cm block so it moves with summary length changes.
-    # CC label is anchored 2 line-heights below Industries, so both shift together.
-    if summary_delta != 0:
-        lo, hi = INDUSTRIES_STREAM_Y_RANGE
-        shift_blocks_in_y_range(doc, 0, y_lo=lo, y_hi=hi, delta=summary_delta)
-        print(f"  Industries line shifted by {summary_delta:+.2f}")
-
     # Capture grey bar graphics before redaction, then restore them at shifted positions
     _p0 = doc[0]
     grey_bars = [{"rect": p["rect"], "fill": p["fill"]}
@@ -358,6 +351,13 @@ def generate_pdf(data):
     _p0.add_redact_annot(fitz.Rect(0, 248, _p0.rect.width, 332))
     _p0.add_redact_annot(fitz.Rect(0, 348, _p0.rect.width, 396))
     _p0.apply_redactions()
+
+    # Shift the Industries line cm block AFTER apply_redactions so the modification
+    # is not overwritten when apply_redactions copies the content stream.
+    if summary_delta != 0:
+        lo, hi = INDUSTRIES_STREAM_Y_RANGE
+        shift_blocks_in_y_range(doc, 0, y_lo=lo, y_hi=hi, delta=summary_delta)
+        print(f"  Industries line shifted by {summary_delta:+.2f}")
     for bar in grey_bars:
         r = bar["rect"]
         _p0.draw_rect(fitz.Rect(r.x0, r.y0 + summary_delta, r.x1, r.y1 + summary_delta),
