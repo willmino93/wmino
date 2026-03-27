@@ -376,7 +376,7 @@ def generate_pdf(data):
                       color=None, fill=bar["fill"])
 
     # Re-insert section labels, shifted with summary so spacing is preserved
-    cc_label_y = CC_LABEL_BASE_Y + summary_delta
+    cc_label_y = industries_orig_y + CC_LINES_BELOW_INDUSTRIES * CALIBRI_INNER_LINE_HT + summary_delta
     tp_label_y = 353.3 + summary_delta
     w_core = font_bold_it.text_length("Core ",        fontsize=14)
     w_comp = font_bold.text_length("Competencies", fontsize=14)
