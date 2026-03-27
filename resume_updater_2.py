@@ -395,11 +395,11 @@ def generate_pdf(data):
     _p0.insert_text(fitz.Point(36.0 + w_core,          cc_label_y), "Competencies", fontname="CalibriB",  fontfile=CALIBRI_BOLD,     fontsize=14, color=(0, 0, 0))
     _p0.insert_text(fitz.Point(36.0 + w_core + w_comp, cc_label_y), ":",            fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=14, color=(0, 0, 0))
     _p0.insert_text(fitz.Point(36.0,                   tp_label_y), "Technical Proficiencies:", fontname="CalibriB", fontfile=CALIBRI_BOLD, fontsize=14, color=(0, 0, 0))
-    _p0.insert_text(fitz.Point(36.0, industries_orig_y + summary_delta), industries_text,
+    _p0.insert_text(fitz.Point(36.0, industries_new_y), industries_text,
                     fontname="CalibriBI", fontfile=CALIBRI_BOLD_ITAL, fontsize=12, color=(0, 0, 0))
     print("  Re-inserted: Core Competencies label")
     print("  Re-inserted: Technical Proficiencies label")
-    print(f"  Re-inserted: Industries line at y={industries_orig_y + summary_delta:.1f} (orig={industries_orig_y:.1f})")
+    print(f"  Re-inserted: Industries line at y={industries_new_y:.1f} (orig={industries_orig_y:.1f}, cc_delta={cc_delta:+.2f})")
 
     print(f"  Subheader cm blocks removed: {removed_sub}")
     print(f"  Summary cm blocks removed:   {removed_sum}")
