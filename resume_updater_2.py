@@ -349,7 +349,14 @@ def generate_pdf(data):
     insert_centered(page0, subheader, 118.683, font_bold, "CalibriB", CALIBRI_BOLD, fontsize=16)
     print(f"  Subheader: {subheader!r}")
 
-    summary_lines = wrap_text(summary, font_cal, max_width=540.0)
+    summary_lines  = wrap_text(summary, font_cal, max_width=540.0)
+    orig_summary   = load_yaml(YAML_ORIGINAL).get("summary", "")
+    orig_sum_lines = wrap_text(orig_summary, font_cal, max_width=540.0)
+    summary_delta  = (len(summary_lines) - len(orig_sum_lines)) * CALIBRI_INNER_LINE_HT
+    if summary_delta != 0:
+        COMPANY_SECTIONS["truecar"]["y_start"] += summary_delta
+        print(f"  Summary delta={summary_delta:+.2f} — reflowing page 0 content...")
+
     for i, line in enumerate(summary_lines):
         page0.insert_text(
             fitz.Point(36.0, 144.0 + i * CALIBRI_INNER_LINE_HT), line,
@@ -358,13 +365,14 @@ def generate_pdf(data):
         )
     print(f"  Summary: {len(summary_lines)} line(s)")
 
-    cc_y_values = [269.0, 286.0, 303.0, 320.0]
+    cc_y_values = [269.0 + summary_delta, 286.0 + summary_delta,
+                   303.0 + summary_delta, 320.0 + summary_delta]
     for i, row in enumerate(core_competencies[:4]):
         row_text = "  ".join(f"• {item}" for item in row)
         insert_centered(page0, row_text, cc_y_values[i], font_it, "CalibriIt", CALIBRI_ITALIC)
         print(f"  Core Comp row {i+1}: {row_text[:60]!r}")
 
-    tp_y_values = [371.0, 388.0]
+    tp_y_values = [371.0 + summary_delta, 388.0 + summary_delta]
     for i, row in enumerate(tech_proficiencies[:2]):
         row_text = "  ".join(f"• {item}" for item in row)
         insert_centered(page0, row_text, tp_y_values[i], font_it, "CalibriIt", CALIBRI_ITALIC)
