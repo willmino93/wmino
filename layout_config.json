@@ -1,0 +1,126 @@
+{
+  "paths": {
+    "base_dir": "/Users/willmino/Library/Claude/Resume_Github_Project",
+    "src_pdf": "Will Mino - Resume.pdf",
+    "yaml_working": "resume.yaml",
+    "yaml_original": "resume_original.yaml",
+    "fonts": {
+      "calibri_regular":   "/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibri.ttf",
+      "calibri_italic":    "/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrii.ttf",
+      "calibri_bold":      "/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibrib.ttf",
+      "calibri_bold_italic": "/Applications/Microsoft Excel.app/Contents/Resources/DFonts/Calibriz.ttf",
+      "arial":             "/System/Library/Fonts/Supplemental/Arial.ttf"
+    }
+  },
+
+  "spacing": {
+    "calibri_ascender":          9.0,
+    "calibri_inner_line_ht":     14.65,
+    "calibri_bullet_advance":    14.65,
+    "arial11_ascender":          9.958,
+    "arial12_ascender":          10.863,
+    "summary_to_industries_gap": 19.15
+  },
+
+  "layout": {
+    "subheader": {
+      "page":     0,
+      "y":        118.683,
+      "fontsize": 16,
+      "font":     "calibri_bold",
+      "centered": true,
+      "cm_remove": {"y_min": 98, "y_max": 101}
+    },
+    "summary": {
+      "page":        0,
+      "y_first_line": 144.0,
+      "x":           36.0,
+      "max_width":   540.0,
+      "fontsize":    12,
+      "font":        "calibri_regular",
+      "cm_remove":   {"y_min": 118, "y_max": 121},
+      "redact_y_top": 130
+    },
+    "industries": {
+      "page":     0,
+      "x":        36.0,
+      "font":     "calibri_bold_italic",
+      "fontsize": 12,
+      "cm_remove": {"y_min": 210, "y_max": 240}
+    },
+    "core_competencies": {
+      "page":                     0,
+      "label_lines_below_industries": 2,
+      "max_rows":                 4,
+      "fontsize":                 12,
+      "font":                     "calibri_italic",
+      "label_fontsize":           14,
+      "cm_remove":                {"y_min": 250, "y_max": 320},
+      "redact_rect":              [0, 248, 612, 332],
+      "grey_bar_y_threshold":     340
+    },
+    "technical_proficiencies": {
+      "page":          0,
+      "label_y_base":  353.3,
+      "row_y_base":    [371.0, 388.0],
+      "max_rows":      2,
+      "fontsize":      12,
+      "font":          "calibri_italic",
+      "label_fontsize": 14,
+      "cm_remove":     {"y_min": 350, "y_max": 380},
+      "redact_rect":   [0, 348, 612, 396]
+    },
+    "grey_bars": {
+      "page":    0,
+      "y_lo":    240,
+      "y_hi":    400
+    }
+  },
+
+  "company_sections": {
+    "truecar": {
+      "page":         0,
+      "y_range":      [453, 740],
+      "y_start":      480.45,
+      "x_text":       54.0,
+      "arial_size":   11,
+      "wrap_width":   522.0,
+      "original_y_end": 740
+    },
+    "ekn": {
+      "page":         1,
+      "y_range":      [86, 300],
+      "y_start":      98.1,
+      "x_text":       54.0,
+      "arial_size":   12,
+      "wrap_width":   522.0,
+      "original_y_end": 300
+    },
+    "pfizer": {
+      "page":         1,
+      "y_range":      [345, 545],
+      "y_start":      357.1,
+      "x_text":       54.0,
+      "arial_size":   12,
+      "wrap_width":   522.0,
+      "original_y_end": 545
+    },
+    "tanabe": {
+      "page":         2,
+      "y_range":      [86, 200],
+      "y_start":      98.1,
+      "x_text":       54.0,
+      "arial_size":   12,
+      "wrap_width":   522.0,
+      "original_y_end": 200
+    }
+  },
+
+  "reflow": {
+    "summary_page0_shift_range": [396, 453],
+    "ekn_page1_shift_range":     [300, 345],
+    "tanabe_page2_shift_range":  [200, 400]
+  },
+
+  "stream_pattern": "\nq\n\\.75 0 0 \\.75 36 ([\\d.]+) cm\n0 0 0 RG 0 0 0 rg\n.*?\nQ"
+}
